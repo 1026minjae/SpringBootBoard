@@ -1,0 +1,14 @@
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="question : ${questionList}">
+            <td th:text="${question.title}"></td>
+            <td th:text="${question.createdTime}"></td>
+        </tr>
+    </tbody>
+</table>

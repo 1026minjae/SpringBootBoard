@@ -128,8 +128,13 @@ class SbbKotlinApplicationTests {
         // 5. check if deleting the answer is successful
         this.answerRepo.deleteById(id)
         
-        val removed = this.answerRepo.findById(id)
-        assertFalse(removed.isPresent)
+        val removed_a = this.answerRepo.findById(id)
+        assertFalse(removed_a.isPresent)
+
+        this.questionRepo.deleteById(qid)
+
+        val removed_q = this.questionRepo.findById(qid)
+        assertFalse(removed_q.isPresent)
     }
 
 }
