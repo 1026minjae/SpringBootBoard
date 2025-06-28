@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Assertions.*
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.beans.factory.annotation.Autowired
 
-import com.sbb.sbb_kotlin.entity.Question
-import com.sbb.sbb_kotlin.entity.Answer
-
-import com.sbb.sbb_kotlin.repository.QuestionRepository
-import com.sbb.sbb_kotlin.repository.AnswerRepository
-import com.sbb.sbb_kotlin.repository.QuestionJdbcRepository
-import com.sbb.sbb_kotlin.repository.AnswerJdbcRepository
+import com.sbb.sbb_kotlin.question.Question
+import com.sbb.sbb_kotlin.question.QuestionRepository
+import com.sbb.sbb_kotlin.answer.Answer
+import com.sbb.sbb_kotlin.answer.AnswerRepository
 
 
 import java.time.LocalDateTime

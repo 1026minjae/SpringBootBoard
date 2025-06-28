@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import org.springframework.boot.context.event.ApplicationReadyEvent
 
 @Component
-class DbTest(private val jdbcTemplate: JdbcTemplate) {
+class MySqlConnectionChecker(private val jdbcTemplate: JdbcTemplate) {
 
     @EventListener(ApplicationReadyEvent::class)
     fun testConnection() {

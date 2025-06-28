@@ -1,4 +1,4 @@
-package com.sbb.sbb_kotlin.repository
+package com.sbb.sbb_kotlin.answer
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 
 import java.time.LocalDateTime
 
-import com.sbb.sbb_kotlin.entity.Answer
+import com.sbb.sbb_kotlin.answer.Answer
 
 /* This class is for complicated sql actions */
 @Repository
