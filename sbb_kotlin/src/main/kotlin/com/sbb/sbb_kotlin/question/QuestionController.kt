@@ -4,15 +4,15 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 
-import com.sbb.sbb_kotlin.question.QuestionRepository
+import com.sbb.sbb_kotlin.question.QuestionService
 
 @Controller
 class QuestionController (
-    private val questionRepo: QuestionRepository
+    private val questionService: QuestionService
 ) {
     @GetMapping("/question/list")
     fun list(model: Model): String {
-        val questionList = questionRepo.findAll()
+        val questionList = questionService.getList()
         model.addAttribute("questionList", questionList)
         return "question_list"
     }    
