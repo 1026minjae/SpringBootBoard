@@ -1,0 +1,19 @@
+<html layout:decorate="~{layout}">
+    <div layout:fragment="content" class="container">
+        <h5 class="my-3 border-bottom pb-2">Create a new question</h5>
+
+        <form th:action="@{/question/create}" th:object="${questionForm}" method="post">
+            <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" th:field="*{title}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
+            </div>
+            <input type="submit" value="Save" class="btn btn-primary my-2">
+        </form>
+    </div>
+</html>

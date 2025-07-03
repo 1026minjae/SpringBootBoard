@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service
 class AnswerService (
     private val answerRepo: AnswerRepository
 ) {
-    fun create(question: Question, cont: String) {
+    fun create(question: Question, content: String) {
         val answer = Answer(
             questionId = question.id!!,
-            content = cont,
+            content = content,
             createdTime = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
         )
