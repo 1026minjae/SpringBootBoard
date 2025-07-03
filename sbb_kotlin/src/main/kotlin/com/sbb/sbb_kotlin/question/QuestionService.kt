@@ -3,7 +3,6 @@ package com.sbb.sbb_kotlin.question
 import org.springframework.stereotype.Service
 
 import com.sbb.sbb_kotlin.DataNotFoundException
-import com.sbb.sbb_kotlin.question.Question
 
 @Service
 class QuestionService (

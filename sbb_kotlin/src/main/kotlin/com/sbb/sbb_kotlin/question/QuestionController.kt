@@ -1,19 +1,17 @@
-package com.sbb.sbb_kotlin
+package com.sbb.sbb_kotlin.question
 
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
-import com.sbb.sbb_kotlin.question.QuestionRepository
-import com.sbb.sbb_kotlin.question.QuestionService
+import com.sbb.sbb_kotlin.answer.AnswerService
 
 @RequestMapping("/question")
 @Controller
 class QuestionController (
-    private val questionRepo: QuestionRepository,
-    private val questionService: QuestionService
+    private val questionService: QuestionService,
+    private val answerService: AnswerService
 ) {
     @GetMapping("/list")
     fun list(model: Model): String {
@@ -25,7 +23,9 @@ class QuestionController (
     @GetMapping("/detail/{id}")
     fun detail(model: Model, @PathVariable("id") id: Long): String {
         val question = questionService.getQuestion(id)
+        val answerList = answerService.getList(id)
         model.addAttribute("question", question)
+        model.addAttribute("answerList", answerList)
         return "question_detail"
     }
 }
