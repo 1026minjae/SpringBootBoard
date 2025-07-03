@@ -1,22 +1,22 @@
-<link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
-
-<div class="container my-3">
-    <table class="table">
-        <thead class="table-dark">
-            <tr>
-                <th>No.</th>
-                <th>Title</th>
-                <th>Created</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="question, loop : ${questionList}">
-                <td th:text="${loop.count}"></td>
-                <td>
-                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.title}"></a>
-                </td>
-                <td th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<html layout:decorate="~{layout}">
+    <div layout:fragment="content" class="container my-3">
+        <table class="table">
+            <thead class="table-dark">
+                <tr>
+                    <th>No.</th>
+                    <th>Title</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="question, loop : ${questionList}">
+                    <td th:text="${loop.count}"></td>
+                    <td>
+                        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.title}"></a>
+                    </td>
+                    <td th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</html>
