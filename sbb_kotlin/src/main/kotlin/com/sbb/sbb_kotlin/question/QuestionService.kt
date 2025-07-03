@@ -1,8 +1,7 @@
 package com.sbb.sbb_kotlin.question
 
-import org.springframework.stereotype.Service
-
 import com.sbb.sbb_kotlin.DataNotFoundException
+import org.springframework.stereotype.Service
 
 @Service
 class QuestionService (

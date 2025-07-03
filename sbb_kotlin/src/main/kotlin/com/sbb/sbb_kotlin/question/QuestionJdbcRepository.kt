@@ -1,12 +1,10 @@
 package com.sbb.sbb_kotlin.question
 
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import org.springframework.stereotype.Repository
-
-import java.time.LocalDateTime
-
 import com.sbb.sbb_kotlin.question.Question
+import java.time.LocalDateTime
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
 
 /* This class is for complicated sql actions */
 @Repository

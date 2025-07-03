@@ -1,18 +1,14 @@
 package com.sbb.sbb_kotlin
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.beans.factory.annotation.Autowired
-
-import com.sbb.sbb_kotlin.question.Question
-import com.sbb.sbb_kotlin.question.QuestionRepository
 import com.sbb.sbb_kotlin.answer.Answer
 import com.sbb.sbb_kotlin.answer.AnswerRepository
-
-
+import com.sbb.sbb_kotlin.question.Question
+import com.sbb.sbb_kotlin.question.QuestionRepository
 import java.time.LocalDateTime
-import java.time.LocalDate
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class SbbKotlinApplicationTests {

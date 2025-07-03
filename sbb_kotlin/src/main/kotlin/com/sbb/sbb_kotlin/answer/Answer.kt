@@ -1,10 +1,9 @@
 package com.sbb.sbb_kotlin.answer
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
-import org.springframework.data.relational.core.mapping.Column
-
 import java.time.LocalDateTime
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
 
 @Table("ANSWERS")
 data class Answer(
