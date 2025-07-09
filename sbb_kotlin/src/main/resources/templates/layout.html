@@ -17,8 +17,14 @@
 </head>
 
 <body>
+    <!-- Navigation bar -->
+    <nav th:replace="~{navbar :: navbarFragment}"></nav>
+
     <!-- Content in basic template -->
     <th:block layout:fragment="content"></th:block>
+
+    <!-- Bootstrap JS -->
+    <script th:src="@{/bootstrap.min.js}"></script>
 </body>
 
 </html>
