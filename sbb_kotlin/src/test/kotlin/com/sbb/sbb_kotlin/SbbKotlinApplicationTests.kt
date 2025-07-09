@@ -4,6 +4,7 @@ import com.sbb.sbb_kotlin.answer.Answer
 import com.sbb.sbb_kotlin.answer.AnswerRepository
 import com.sbb.sbb_kotlin.question.Question
 import com.sbb.sbb_kotlin.question.QuestionRepository
+import com.sbb.sbb_kotlin.question.QuestionService
 import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -132,5 +133,18 @@ class SbbKotlinApplicationTests {
         val removed_q = this.questionRepo.findById(qid)
         assertFalse(removed_q.isPresent)
     }
+
+/* 
+    // To create test data
+    @Autowired
+    lateinit var questionService: QuestionService
+
+    @Test
+    fun testSample() {
+        for (i in 1..300) {
+            this.questionService.create("Test Data:[${i}]", "No content")
+        }
+    }
+*/
 
 }

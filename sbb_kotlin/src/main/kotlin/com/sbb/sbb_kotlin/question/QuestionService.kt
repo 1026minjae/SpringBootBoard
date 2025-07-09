@@ -2,6 +2,11 @@ package com.sbb.sbb_kotlin.question
 
 import com.sbb.sbb_kotlin.DataNotFoundException
 import java.time.LocalDateTime
+import java.util.ArrayList
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,8 +23,10 @@ class QuestionService (
         }
     }
 
-    fun getList(): Iterable<Question> {
-        return questionRepo.findAll()
+    fun getList(page: Int): Page<Question> {
+        val sorts = listOf(Sort.Order.desc("createdTime"))
+        val pageable = PageRequest.of(page, 10, Sort.by(sorts))
+        return questionRepo.findAll(pageable)
     }
 
     fun create(title: String, content: String) {
