@@ -3,7 +3,6 @@ package com.sbb.sbb_kotlin.question
 import com.sbb.sbb_kotlin.DataNotFoundException
 import com.sbb.sbb_kotlin.answer.AnswerRepository
 import java.time.LocalDateTime
-import java.util.ArrayList
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
