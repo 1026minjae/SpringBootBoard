@@ -9,4 +9,7 @@ import org.springframework.data.repository.query.Param
 /* For simple sql actions */
 interface AnswerRepository : CrudRepository<Answer, Long> {
     fun findByQuestionId(question_id: Long): List<Answer>
+
+    @Query("SELECT * FROM ANSWERS WHERE question_id IN (:questionIds)")
+    fun findByQuestionIds(@Param("questionIds") questionIds: List<Long>): List<Answer>
 }

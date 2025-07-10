@@ -1,6 +1,6 @@
 package com.sbb.sbb_kotlin.answer
 
-import com.sbb.sbb_kotlin.question.Question
+import com.sbb.sbb_kotlin.question.QuestionDTO
 import java.time.LocalDateTime
 import org.springframework.stereotype.Service
 
@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service
 class AnswerService (
     private val answerRepo: AnswerRepository
 ) {
-    fun create(question: Question, content: String) {
+    fun create(question: QuestionDTO, content: String) {
         val answer = Answer(
-            questionId = question.id!!,
+            questionId = question.id,
             content = content,
             createdTime = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()

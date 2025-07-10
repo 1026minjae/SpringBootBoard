@@ -28,9 +28,8 @@ class QuestionController (
     @GetMapping("/detail/{id}")
     fun detail(model: Model, @PathVariable("id") id: Long, answerForm: AnswerForm): String {
         val question = questionService.getQuestion(id)
-        val answerList = answerService.getList(id)
+        question.answerList = answerService.getList(id)
         model.addAttribute("question", question)
-        model.addAttribute("answerList", answerList)
         return "question_detail"
     }
 
