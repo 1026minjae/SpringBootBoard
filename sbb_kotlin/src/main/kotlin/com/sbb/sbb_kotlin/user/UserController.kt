@@ -53,4 +53,9 @@ class UserController (
 
         return "redirect:/"
     }
+
+    @GetMapping("/login")
+    fun login(): String {
+        return "login_form"
+    }
 }
