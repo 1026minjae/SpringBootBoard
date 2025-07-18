@@ -12,15 +12,15 @@ class UserService (
     fun create(username: String, email: String, password: String) {
         val user = SiteUser(
             username = username,
-            password = this.passwordEncoder.encode(password),
+            password = passwordEncoder.encode(password),
             email = email
         )
 
-        this.userRepo.save(user)
+        userRepo.save(user)
     }
 
     fun getUser(username: String): UserInfo {
-        val siteUser = this.userRepo.findByUsername(username)
+        val siteUser = userRepo.findByUsername(username)
         if (siteUser.isPresent) {
             val user = siteUser.get()
             return UserInfo(user.id!!, user.username)

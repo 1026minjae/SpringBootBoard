@@ -6,6 +6,10 @@
             <div class="card-body">
                 <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
                 <div class="d-flex justify-content-end">
+                    <div th:if="${question.updatedAt != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">modified at</div>
+                        <div th:text="${#temporals.format(question.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
                     <div class="badge bg-light text-dark p-2 text-start">
                         <div class="mb-2">
                             <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
@@ -13,6 +17,16 @@
                         <div th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
                     </div>
                 </div>
+            </div>
+            <div class="m-3">
+                <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
+                    sec:authorize="isAuthenticated()"
+                    th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                    th:text="Modify"></a>
+                <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
+                    class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                    th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
+                    th:text="Delete"></a>
             </div>
         </div>
 
@@ -24,12 +38,26 @@
             <div class="card-body">
                 <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
                 <div class="d-flex justify-content-end">
+                    <div th:if="${answer.updatedAt != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">modified at</div>
+                        <div th:text="${#temporals.format(answer.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
                     <div class="badge bg-light text-dark p-2 text-start">
                         <div class="mb-2">
                             <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
                         </div>
                         <div th:text="${#temporals.format(answer.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
                     </div>
+                </div>
+                <div class="m-3">
+                    <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
+                        sec:authorize="isAuthenticated()"
+                        th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                        th:text="Modify"></a>
+                    <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
+                        class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                        th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                        th:text="Delete"></a>
                 </div>
             </div>
         </div>
@@ -42,4 +70,15 @@
             <input type="submit" value="Add answer" class="btn btn-primary my-2">
         </form>
     </div>
+
+    <script layout:fragment="script" type='text/javascript'>
+        const delete_elements = document.getElementsByClassName("delete");
+        Array.from(delete_elements).forEach(function(element) {
+            element.addEventListener('click', function() {
+                if(confirm("Do you really want to delete this question?")) {
+                    location.href = this.dataset.uri;
+                };
+            });
+        });
+    </script>
 </html>

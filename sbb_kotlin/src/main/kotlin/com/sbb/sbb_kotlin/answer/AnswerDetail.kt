@@ -6,7 +6,8 @@ import java.time.LocalDateTime
 data class AnswerDetail(
     val id: Long,
     val questionId: Long,
-    val content: String,
+    var content: String,
     val createdTime: LocalDateTime,
+    val updatedAt: LocalDateTime,
     val author: UserInfo
 )

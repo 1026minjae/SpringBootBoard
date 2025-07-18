@@ -5,6 +5,7 @@ import com.sbb.sbb_kotlin.answer.AnswerService
 import com.sbb.sbb_kotlin.user.UserService
 import jakarta.validation.Valid
 import java.security.Principal
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 
 @RequestMapping("/question")
 @Controller
@@ -36,7 +38,7 @@ class QuestionController (
         bindingResult: BindingResult,
         principal: Principal
     ): String {
-        val user = this.userService.getUser(principal.getName())
+        val user = userService.getUser(principal.getName())
         if (bindingResult.hasErrors()) {
             return "question_form"
         }
@@ -56,5 +58,57 @@ class QuestionController (
         val paging = questionService.getList(page)
         model.addAttribute("paging", paging)
         return "question_list"
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/delete/{id}")
+    fun questionDelete(principal: Principal, @PathVariable("id") id: Long): String {
+        val question = questionService.getQuestionDetailWithoutAnswerList(id)
+
+        if (!question.author.username.equals(principal.getName())) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to delete")
+        }
+
+        questionService.delete(id);
+
+        return "redirect:/";
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/modify/{id}")
+    fun questionModify(questionForm: QuestionForm, @PathVariable("id") id: Long, principal: Principal): String {
+        val question = questionService.getQuestionDetail(id)
+
+        if(!question.author.username.equals(principal.getName())) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to modify")
+        }
+        
+        questionForm.title = question.title
+        questionForm.content = question.content
+        
+        return "question_form";
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/modify/{id}")
+    fun questionModify(
+        @Valid questionForm: QuestionForm, 
+        bindingResult: BindingResult, 
+        principal: Principal, 
+        @PathVariable("id") id: Long
+    ): String {
+        if (bindingResult.hasErrors()) {
+            return "question_form";
+        }
+
+        val question = questionService.getQuestionDetailWithoutAnswerList(id)
+
+        if (!question.author.username.equals(principal.getName())) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to modify")
+        }
+
+        questionService.modify(question, questionForm.title!!, questionForm.content!!)
+        
+        return String.format("redirect:/question/detail/%s", id);
     }
 }

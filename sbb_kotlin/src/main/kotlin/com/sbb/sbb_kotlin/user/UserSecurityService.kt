@@ -16,7 +16,7 @@ class UserSecurityService (
 ): UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails {
-        val _siteUser = this.userRepo.findByUsername(username);
+        val _siteUser = userRepo.findByUsername(username);
         if (_siteUser.isEmpty()) {
             throw UsernameNotFoundException("Cannot find the user")
         }

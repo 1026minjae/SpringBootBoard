@@ -9,6 +9,7 @@ data class QuestionDetail(
     val title: String,
     val content: String,
     val createdTime: LocalDateTime,
+    val updatedAt: LocalDateTime,
     var answerList: List<AnswerDetail>,
     var author: UserInfo
 )

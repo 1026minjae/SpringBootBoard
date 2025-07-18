@@ -22,13 +22,31 @@ class QuestionJdbcRepository(
         return (result > 0)
     }
 
-    fun findQuestionDetail(id: Long): QuestionDetail? {
+    fun findQuestionById(id: Long): Question? {
+        val sql = "SELECT * FROM QUESTIONS WHERE id = :id"
+        
+        val params = MapSqlParameterSource().addValue("id", id)
+
+        return jdbc.queryForObject(sql, params) { rs, _ ->
+            Question(
+                id = rs.getLong("id"),
+                title = rs.getString("title"), 
+                content = rs.getString("content"), 
+                createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
+                updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
+                authorId = rs.getLong("author_id")
+            )
+        }
+    }
+
+    fun findQuestionDetailById(id: Long): QuestionDetail? {
         val sql = """
             SELECT
                 Q.id AS id,
                 Q.title AS title,
                 Q.content AS content,
                 Q.created_time AS created_time,
+                Q.updated_at AS updated_at,
                 U.id AS author_id,
                 U.username AS author_name
             FROM QUESTIONS Q 
@@ -44,6 +62,7 @@ class QuestionJdbcRepository(
                 title = rs.getString("title"), 
                 content = rs.getString("content"), 
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
+                updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
                 answerList = emptyList(),
                 author = UserInfo(rs.getLong("author_id"), rs.getString("author_name"))
             )

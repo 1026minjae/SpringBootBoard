@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Size
 class QuestionForm(
     @field:NotEmpty(message="Title is necessary")    
     @field:Size(max=200)
-    val title: String?,
+    var title: String?,
     
     @field:NotEmpty(message="Content is necessary")
-    val content: String?
+    var content: String?
 )

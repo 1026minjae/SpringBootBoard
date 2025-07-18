@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotEmpty
 
 class AnswerForm(
     @field:NotEmpty(message="Content is necessary")
-    val content: String?
+    var content: String?
 )

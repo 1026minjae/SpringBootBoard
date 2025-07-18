@@ -29,23 +29,58 @@ class QuestionService (
         questionCrudRepo.save(question)
     }
 
+    fun delete(id: Long) {
+        questionCrudRepo.deleteById(id)
+    }
+
     fun getList(page_num: Int): Page<QuestionListEntry> {
         val sorts = listOf(Sort.Order.desc("createdTime"), Sort.Order.desc("id"))
         val pageable = PageRequest.of(page_num, 10, Sort.by(sorts))
         
-        return this.questionJdbcRepo.findQuestionList(pageable)
+        return questionJdbcRepo.findQuestionList(pageable)
     }
-    
-    fun getQuestionDetail(id: Long): QuestionDetail {
-        val question = questionJdbcRepo.findQuestionDetail(id)
-        
+
+    fun getQuestion(id: Long): Question {
+        val question = questionJdbcRepo.findQuestionById(id)
+
         if (question != null) {
-            question.answerList = answerJdbcRepo.findAnswerListByQuestionId(id)
             return question
         }
         else {
             throw DataNotFoundException("question not found")
         }
+    }
+    
+    fun getQuestionDetail(id: Long): QuestionDetail {
+        val question = getQuestionDetailWithoutAnswerList(id)
+        
+        question.answerList = answerJdbcRepo.findAnswerListByQuestionId(id)
+        
+        return question
+    }
+
+    fun getQuestionDetailWithoutAnswerList(id: Long): QuestionDetail {
+        val question = questionJdbcRepo.findQuestionDetailById(id)
+        
+        if (question != null) {
+            return question
+        }
+        else {
+            throw DataNotFoundException("question not found")
+        }
+    }
+
+    fun modify(question: QuestionDetail, title: String, content: String) {
+        val q = Question(
+            id = question.id,
+            title = title, 
+            content = content, 
+            createdTime = question.createdTime, 
+            updatedAt = LocalDateTime.now(), 
+            authorId = question.author.id
+        )
+
+        questionCrudRepo.save(q)
     }
 
 }
