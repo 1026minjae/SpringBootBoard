@@ -18,4 +18,15 @@ class UserService (
 
         this.userRepo.save(user)
     }
+
+    fun getUser(username: String): UserInfo {
+        val siteUser = this.userRepo.findByUsername(username)
+        if (siteUser.isPresent) {
+            val user = siteUser.get()
+            return UserInfo(user.id!!, user.username)
+        }
+        else {
+            throw DataNotFoundException("User is not found")
+        }
+    }
 }

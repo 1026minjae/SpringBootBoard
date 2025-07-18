@@ -1,24 +1,26 @@
 package com.sbb.sbb_kotlin.answer
 
-import com.sbb.sbb_kotlin.question.QuestionDTO
+import com.sbb.sbb_kotlin.user.UserInfo
 import java.time.LocalDateTime
 import org.springframework.stereotype.Service
 
 @Service
 class AnswerService (
-    private val answerRepo: AnswerRepository
+    private val answerCrudRepo: AnswerCrudRepository,
+    private val answerJdbcRepo: AnswerJdbcRepository
 ) {
-    fun create(question: QuestionDTO, content: String) {
+    fun create(questionId: Long, content: String, author: UserInfo) {
         val answer = Answer(
-            questionId = question.id,
+            questionId = questionId,
             content = content,
             createdTime = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
+            updatedAt = LocalDateTime.now(),
+            authorId = author.id
         )
-        answerRepo.save(answer)
+        answerCrudRepo.save(answer)
     }
 
-    fun getList(qid: Long): List<Answer> {
-        return answerRepo.findByQuestionId(qid)
+    fun getList(qid: Long): List<AnswerDetail> {
+        return answerJdbcRepo.findAnswerListByQuestionId(qid)
     }
 }

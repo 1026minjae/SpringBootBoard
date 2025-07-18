@@ -17,6 +17,7 @@ data class Answer(
     @Column("created_time")
     val createdTime: LocalDateTime,
     @Column("updated_at")
-    var updatedAt: LocalDateTime
-
+    var updatedAt: LocalDateTime,
+    @Column("author_id")
+    var authorId: Long
 )

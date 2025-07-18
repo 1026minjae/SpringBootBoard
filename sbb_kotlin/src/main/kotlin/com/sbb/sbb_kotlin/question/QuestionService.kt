@@ -1,7 +1,8 @@
 package com.sbb.sbb_kotlin.question
 
 import com.sbb.sbb_kotlin.DataNotFoundException
-import com.sbb.sbb_kotlin.answer.AnswerRepository
+import com.sbb.sbb_kotlin.answer.AnswerJdbcRepository
+import com.sbb.sbb_kotlin.user.UserInfo
 import java.time.LocalDateTime
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -12,62 +13,39 @@ import org.springframework.stereotype.Service
 
 @Service
 class QuestionService (
-    private val questionRepo: QuestionRepository,
-    private val answerRepo: AnswerRepository
+    private val questionCrudRepo: QuestionCrudRepository,
+    private val questionJdbcRepo: QuestionJdbcRepository,
+    private val answerJdbcRepo: AnswerJdbcRepository
 ) {
-    fun getQuestionWithoutAnswerList(id: Long): QuestionDTO {
-        val question = questionRepo.findById(id)
-        if (question.isPresent) {
-            val q = question.get()
-            return QuestionDTO(
-                q.id!!, 
-                q.title, 
-                q.content, 
-                q.createdTime, 
-                q.updatedAt, 
-                emptyList()
-            )
+
+    fun create(title: String, content: String, user: UserInfo) {
+        val question = Question(
+            title = title,
+            content = content,
+            createdTime = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now(),
+            authorId = user.id
+        )
+        questionCrudRepo.save(question)
+    }
+
+    fun getList(page_num: Int): Page<QuestionListEntry> {
+        val sorts = listOf(Sort.Order.desc("createdTime"), Sort.Order.desc("id"))
+        val pageable = PageRequest.of(page_num, 10, Sort.by(sorts))
+        
+        return this.questionJdbcRepo.findQuestionList(pageable)
+    }
+    
+    fun getQuestionDetail(id: Long): QuestionDetail {
+        val question = questionJdbcRepo.findQuestionDetail(id)
+        
+        if (question != null) {
+            question.answerList = answerJdbcRepo.findAnswerListByQuestionId(id)
+            return question
         }
         else {
             throw DataNotFoundException("question not found")
         }
     }
 
-    fun getQuestion(id: Long): QuestionDTO {
-        val question = this.getQuestionWithoutAnswerList(id)
-        question.answerList = answerRepo.findByQuestionId(id)
-        return question
-    }
-
-    fun getList(page_num: Int): Page<QuestionDTO> {
-        val sorts = listOf(Sort.Order.desc("createdTime"), Sort.Order.desc("id"))
-        val pageable = PageRequest.of(page_num, 10, Sort.by(sorts))
-        val page = questionRepo.findAll(pageable)
-
-        val questionIds = page.content.mapNotNull { it.id }
-        val answerListByQuestionId = answerRepo.findByQuestionIds(questionIds).groupBy { it.questionId }
-
-        val questionsWithAnswerList = page.content.map { question -> 
-            QuestionDTO(
-                question.id!!,
-                question.title,
-                question.content,
-                question.createdTime,
-                question.updatedAt,
-                answerListByQuestionId[question.id] ?: emptyList()
-            )
-        }
-
-        return PageImpl(questionsWithAnswerList, page.pageable, page.totalElements)
-    }
-
-    fun create(title: String, content: String) {
-        val question = Question(
-            title = title,
-            content = content,
-            createdTime = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-        )
-        questionRepo.save(question)
-    }
 }

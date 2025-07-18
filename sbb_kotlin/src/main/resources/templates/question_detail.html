@@ -7,6 +7,9 @@
                 <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
                 <div class="d-flex justify-content-end">
                     <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">
+                            <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                        </div>
                         <div th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
                     </div>
                 </div>
@@ -22,6 +25,9 @@
                 <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
                 <div class="d-flex justify-content-end">
                     <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">
+                            <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                        </div>
                         <div th:text="${#temporals.format(answer.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
                     </div>
                 </div>
@@ -31,7 +37,8 @@
         <!-- New answer box -->
         <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
             <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-            <textarea th:field="*{content}" rows="15" class="form-control"></textarea>
+            <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" rows="10" class="form-control"></textarea>
+            <textarea sec:authorize="isAuthenticated()" th:field="*{content}" rows="10" class="form-control"></textarea>
             <input type="submit" value="Add answer" class="btn btn-primary my-2">
         </form>
     </div>

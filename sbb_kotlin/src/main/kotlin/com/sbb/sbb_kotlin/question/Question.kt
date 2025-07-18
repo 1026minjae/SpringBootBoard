@@ -8,8 +8,8 @@ import org.springframework.data.relational.core.mapping.Table
 @Table("QUESTIONS")
 data class Question(
     @Id 
-    val id: Long? = null, 
-    
+    val id: Long? = null,
+
     @Column("title")
     var title: String,
     @Column("content")
@@ -17,5 +17,7 @@ data class Question(
     @Column("created_time")
     val createdTime: LocalDateTime,
     @Column("updated_at")
-    var updatedAt: LocalDateTime
+    var updatedAt: LocalDateTime,
+    @Column("author_id")
+    var authorId: Long
 )

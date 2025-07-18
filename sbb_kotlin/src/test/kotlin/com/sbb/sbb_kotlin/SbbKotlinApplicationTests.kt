@@ -1,10 +1,12 @@
 package com.sbb.sbb_kotlin
 
+/*
 import com.sbb.sbb_kotlin.answer.Answer
 import com.sbb.sbb_kotlin.answer.AnswerRepository
 import com.sbb.sbb_kotlin.question.Question
 import com.sbb.sbb_kotlin.question.QuestionRepository
 import com.sbb.sbb_kotlin.question.QuestionService
+*/
 import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -14,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 class SbbKotlinApplicationTests {
 
+/* 
 	@Autowired
     lateinit var questionRepo: QuestionRepository
 
@@ -134,7 +137,6 @@ class SbbKotlinApplicationTests {
         assertFalse(removed_q.isPresent)
     }
 
-/* 
     // To create test data
     @Autowired
     lateinit var questionService: QuestionService

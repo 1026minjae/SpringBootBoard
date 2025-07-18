@@ -2,22 +2,24 @@
     <div layout:fragment="content" class="container my-3">
         <table class="table">
             <thead class="table-dark">
-                <tr>
+                <tr class="text-center">
                     <th>No.</th>
-                    <th>Title</th>
+                    <th style="width:50%">Title</th>
+                    <th>Author</th>
                     <th>Created</th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="question, loop : ${paging}">
+                <tr class="text-center" th:each="question, loop : ${paging}">
                     <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
-                    <td>
+                    <td class="text-start">
                         <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.title}"></a>
                         <span class="text-danger small ms-2"
-                            th:if="${#lists.size(question.answerList) > 0}" 
-                            th:text="${#lists.size(question.answerList)}">
+                            th:if="${question.numOfAnswer > 0}" 
+                            th:text="${question.numOfAnswer}">
                         </span>
                     </td>
+                    <td><span th:text="${question.authorName}"></span></td>
                     <td th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></td>
                 </tr>
             </tbody>
