@@ -43,9 +43,9 @@ class AnswerController (
             return "question_detail"
         }
         
-        answerService.create(question.id, answerForm.content!!, user)
+        val answer = answerService.create(question.id, answerForm.content!!, user)
 
-        return "redirect:/question/detail/$id"
+        return "redirect:/question/detail/${id}#answer_${answer.id}"
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -100,7 +100,7 @@ class AnswerController (
 
         answerService.modify(answer, answerForm.content!!)
 
-        return "redirect:/question/detail/${answer.questionId}"
+        return "redirect:/question/detail/${answer.questionId}#answer_${id}"
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -113,7 +113,7 @@ class AnswerController (
 
         val qid = answerService.getQuestionIdForAnswer(id)
 
-        return "redirect:/question/detail/$qid"
+        return "redirect:/question/detail/${qid}#answer_${id}"
     }
 
 }

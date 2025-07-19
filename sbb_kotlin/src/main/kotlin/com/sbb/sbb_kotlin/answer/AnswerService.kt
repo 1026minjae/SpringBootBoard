@@ -11,7 +11,7 @@ class AnswerService (
     private val answerJdbcRepo: AnswerJdbcRepository,
     private val answerVoterRepo: AnswerVoterRepository
 ) {
-    fun create(questionId: Long, content: String, author: UserInfo) {
+    fun create(questionId: Long, content: String, author: UserInfo): Answer {
         val answer = Answer(
             questionId = questionId,
             content = content,
@@ -19,7 +19,10 @@ class AnswerService (
             updatedAt = LocalDateTime.now(),
             authorId = author.id
         )
-        answerCrudRepo.save(answer)
+
+        val saved_answer = answerCrudRepo.save(answer)
+
+        return saved_answer
     }
 
     fun delete(id: Long) {
