@@ -22,10 +22,13 @@ class AnswerJdbcRepository(
                 A.created_time AS created_time,
                 A.updated_at AS updated_at,
                 U.id AS author_id,
-                U.username AS author_name
+                U.username AS author_name,
+                COUNT(V.voter_id) AS num_of_voter
             FROM ANSWERS A
                 INNER JOIN USERS U ON A.author_id = U.id
+                LEFT JOIN ANSWER_VOTERS V ON A.id = V.answer_id
             WHERE A.id = :id
+            GROUP BY A.id, A.question_id, A.content, A.created_time, A.updated_at, U.id, U.username
             """.trimIndent()
 
         val params = MapSqlParameterSource().addValue("id", id)
@@ -37,7 +40,8 @@ class AnswerJdbcRepository(
                 content = rs.getString("content"), 
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name"))
+                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
+                numOfVoter = rs.getLong("num_of_voter")
             )
         }
     }
@@ -51,10 +55,13 @@ class AnswerJdbcRepository(
                 A.created_time AS created_time,
                 A.updated_at AS updated_at,
                 U.id AS author_id,
-                U.username AS author_name
+                U.username AS author_name,
+                COUNT(V.voter_id) AS num_of_voter
             FROM ANSWERS A
                 INNER JOIN USERS U ON A.author_id = U.id
+                LEFT JOIN ANSWER_VOTERS V ON A.id = V.answer_id
             WHERE A.question_id = :qid
+            GROUP BY A.id, A.question_id, A.content, A.created_time, A.updated_at, U.id, U.username
             """.trimIndent()
 
         val params = MapSqlParameterSource().addValue("qid", questionId)
@@ -66,9 +73,18 @@ class AnswerJdbcRepository(
                 content = rs.getString("content"), 
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name"))
+                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
+                numOfVoter = rs.getLong("num_of_voter")
             )
         }
+    }
+
+    fun findQuestionIdById(id: Long): Long? {
+        val sql = "SELECT question_id FROM ANSWERS WHERE id = :id"
+
+        val params = MapSqlParameterSource().addValue("id", id)
+
+        return jdbc.queryForObject(sql, params) { rs, _ -> rs.getLong("question_id") }
     }
 
 }

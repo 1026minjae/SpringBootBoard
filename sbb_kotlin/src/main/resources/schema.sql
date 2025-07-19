@@ -25,3 +25,15 @@ CREATE TABLE USERS (
     pw VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE
 );
+
+CREATE TABLE QUESTION_VOTERS (
+    question_id BIGINT,
+    voter_id BIGINT,
+    PRIMARY KEY (question_id, voter_id)
+);
+
+CREATE TABLE ANSWER_VOTERS (
+    answer_id BIGINT,
+    voter_id BIGINT,
+    PRIMARY KEY (answer_id, voter_id)
+);

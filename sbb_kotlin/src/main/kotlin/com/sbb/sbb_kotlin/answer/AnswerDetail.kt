@@ -9,5 +9,6 @@ data class AnswerDetail(
     var content: String,
     val createdTime: LocalDateTime,
     val updatedAt: LocalDateTime,
-    val author: UserInfo
+    val author: UserInfo,
+    val numOfVoter: Long
 )

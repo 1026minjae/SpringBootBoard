@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service
 class QuestionService (
     private val questionCrudRepo: QuestionCrudRepository,
     private val questionJdbcRepo: QuestionJdbcRepository,
+    private val questionVoterRepo: QuestionVoterRepository,
     private val answerJdbcRepo: AnswerJdbcRepository
 ) {
 
@@ -70,6 +71,10 @@ class QuestionService (
         }
     }
 
+    fun getQuestionVoters(id: Long): QuestionVoters {
+        return questionVoterRepo.findVotersByQuestionId(id)
+    }
+
     fun modify(question: QuestionDetail, title: String, content: String) {
         val q = Question(
             id = question.id,
@@ -81,6 +86,12 @@ class QuestionService (
         )
 
         questionCrudRepo.save(q)
+    }
+
+    fun vote(voters: QuestionVoters, newVoter: UserInfo) {
+        if (!voters.voters.contains(newVoter.id)) {
+            questionVoterRepo.addNewVoter(voters.questionId, newVoter.id)
+        }
     }
 
 }

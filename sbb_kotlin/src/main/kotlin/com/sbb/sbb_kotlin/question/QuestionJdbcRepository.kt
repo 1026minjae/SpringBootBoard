@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 
-/* For writing */
+/* For reading */
 @Repository
 class QuestionJdbcRepository(
     private val jdbc: NamedParameterJdbcTemplate
@@ -48,10 +48,13 @@ class QuestionJdbcRepository(
                 Q.created_time AS created_time,
                 Q.updated_at AS updated_at,
                 U.id AS author_id,
-                U.username AS author_name
+                U.username AS author_name,
+                COUNT(V.voter_id) AS num_of_voter
             FROM QUESTIONS Q 
                 INNER JOIN USERS U ON Q.author_id = U.id
+                LEFT JOIN QUESTION_VOTERS V ON Q.id = V.question_id
             WHERE Q.id = :id
+            GROUP BY Q.id, Q.title, Q.content, Q.created_time, Q.updated_at, U.id, U.username
             """.trimIndent()
         
         val params = MapSqlParameterSource().addValue("id", id)
@@ -64,7 +67,8 @@ class QuestionJdbcRepository(
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
                 answerList = emptyList(),
-                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name"))
+                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
+                numOfVoter = rs.getLong("num_of_voter")
             )
         }
     }

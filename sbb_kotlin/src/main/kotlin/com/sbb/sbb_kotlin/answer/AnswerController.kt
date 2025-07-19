@@ -26,6 +26,29 @@ class AnswerController (
 ) {
 
     @PreAuthorize("isAuthenticated()")
+    @PostMapping("/create/{id}")
+    fun createAnswer(
+        model: Model, 
+        @PathVariable("id") id: Long, 
+        @Valid answerForm: AnswerForm, 
+        bindingResult: BindingResult,
+        principal: Principal
+    ): String {
+        val question = questionService.getQuestionDetail(id)
+
+        val user = userService.getUser(principal.getName())
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("question", question)
+            return "question_detail"
+        }
+        
+        answerService.create(question.id, answerForm.content!!, user)
+
+        return "redirect:/question/detail/$id"
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
     fun answerDelete(principal: Principal, @PathVariable("id") id: Long): String {
         val answer = answerService.getAnswerDetail(id)
@@ -81,26 +104,16 @@ class AnswerController (
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/create/{id}")
-    fun createAnswer(
-        model: Model, 
-        @PathVariable("id") id: Long, 
-        @Valid answerForm: AnswerForm, 
-        bindingResult: BindingResult,
-        principal: Principal
-    ): String {
-        val question = questionService.getQuestionDetail(id)
+    @GetMapping("/vote/{id}")
+    fun answerVote(principal: Principal, @PathVariable("id") id: Long): String {
+        val voters = answerService.getAnswerVoters(id)
+        val newVoter = userService.getUser(principal.getName())
 
-        val user = userService.getUser(principal.getName())
+        answerService.vote(voters, newVoter)
 
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("question", question)
-            return "question_detail"
-        }
-        
-        answerService.create(question.id, answerForm.content!!, user)
+        val qid = answerService.getQuestionIdForAnswer(id)
 
-        return "redirect:/question/detail/$id"
+        return "redirect:/question/detail/$qid"
     }
 
 }

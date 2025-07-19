@@ -77,7 +77,7 @@ class QuestionController (
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
     fun questionModify(questionForm: QuestionForm, @PathVariable("id") id: Long, principal: Principal): String {
-        val question = questionService.getQuestionDetail(id)
+        val question = questionService.getQuestionDetailWithoutAnswerList(id)
 
         if(!question.author.username.equals(principal.getName())) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to modify")
@@ -109,6 +109,18 @@ class QuestionController (
 
         questionService.modify(question, questionForm.title!!, questionForm.content!!)
         
-        return String.format("redirect:/question/detail/%s", id);
+        return "redirect:/question/detail/$id"
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/vote/{id}")
+    fun questionVote(principal: Principal, @PathVariable("id") id: Long): String {
+        val voters = questionService.getQuestionVoters(id)
+        val newVoter = userService.getUser(principal.getName())
+        
+        questionService.vote(voters, newVoter)
+        
+        return "redirect:/question/detail/$id"
+    }
+
 }

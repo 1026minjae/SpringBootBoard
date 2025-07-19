@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service
 @Service
 class AnswerService (
     private val answerCrudRepo: AnswerCrudRepository,
-    private val answerJdbcRepo: AnswerJdbcRepository
+    private val answerJdbcRepo: AnswerJdbcRepository,
+    private val answerVoterRepo: AnswerVoterRepository
 ) {
     fun create(questionId: Long, content: String, author: UserInfo) {
         val answer = Answer(
@@ -35,6 +36,21 @@ class AnswerService (
         }
     }
 
+    fun getAnswerVoters(id: Long): AnswerVoters {
+        return answerVoterRepo.findVotersByAnswerId(id)
+    }
+
+    fun getList(qid: Long): List<AnswerDetail> {
+        return answerJdbcRepo.findAnswerListByQuestionId(qid)
+    }
+
+    fun getQuestionIdForAnswer(aid: Long): Long {
+        val qid = answerJdbcRepo.findQuestionIdById(aid)
+
+        if (qid != null) return qid
+        else throw DataNotFoundException("question id not found")
+    }
+
     fun modify(answer: AnswerDetail, content: String) {
         val a = Answer(
             id = answer.id,
@@ -48,7 +64,10 @@ class AnswerService (
         answerCrudRepo.save(a);
     }
 
-    fun getList(qid: Long): List<AnswerDetail> {
-        return answerJdbcRepo.findAnswerListByQuestionId(qid)
+    fun vote(voters: AnswerVoters, newVoter: UserInfo) {
+        if (!voters.voters.contains(newVoter.id)) {
+            answerVoterRepo.addNewVoter(voters.answerId, newVoter.id)
+        }
     }
+
 }
