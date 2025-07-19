@@ -73,22 +73,41 @@ class QuestionJdbcRepository(
         }
     }
 
-    fun findQuestionList(pageable: Pageable): Page<QuestionListEntry> {
+    fun findQuestionList(keyword: String, pageable: Pageable): Page<QuestionListEntry> {
         val limit = pageable.pageSize
         val offset = pageable.pageNumber * pageable.pageSize
 
-        val countQuery = "SELECT COUNT(*) FROM QUESTIONS INNER JOIN USERS"
+        val countQuery = """
+            SELECT 
+                COUNT(DISTINCT Q.id) 
+            FROM QUESTIONS Q
+                INNER JOIN USERS U1 ON Q.author_id = U1.id
+                LEFT JOIN ANSWERS A ON Q.id = A.question_id
+                LEFT JOIN USERS U2 ON A.author_id = U2.id
+            WHERE Q.title LIKE '%${keyword}%'
+                OR Q.content LIKE '%${keyword}%'
+                OR U1.username LIKE '%${keyword}%'
+                OR A.content LIKE '%${keyword}%'
+                OR U2.username LIKE '%${keyword}%'
+            """.trimIndent()
+        
         val dataQuery = """
             SELECT 
                 Q.id AS id, 
                 Q.title AS title,
                 Q.created_time AS created_time,
                 COUNT(A.id) AS num_of_answer,
-                U.username AS author_name
+                U1.username AS author_name
             FROM QUESTIONS Q
-                INNER JOIN USERS U ON Q.author_id = U.id
+                INNER JOIN USERS U1 ON Q.author_id = U1.id
                 LEFT JOIN ANSWERS A ON Q.id = A.question_id
-            GROUP BY Q.id, Q.title, Q.created_time, U.username
+                LEFT JOIN USERS U2 ON A.author_id = U2.id
+            WHERE Q.title LIKE '%${keyword}%'
+                OR Q.content LIKE '%${keyword}%'
+                OR U1.username LIKE '%${keyword}%'
+                OR A.content LIKE '%${keyword}%'
+                OR U2.username LIKE '%${keyword}%'
+            GROUP BY Q.id, Q.title, Q.created_time, U1.username
             ORDER BY Q.created_time DESC LIMIT :limit OFFSET :offset
             """.trimIndent()
 

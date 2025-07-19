@@ -34,11 +34,11 @@ class QuestionService (
         questionCrudRepo.deleteById(id)
     }
 
-    fun getList(page_num: Int): Page<QuestionListEntry> {
+    fun getList(page_num: Int, kw: String): Page<QuestionListEntry> {
         val sorts = listOf(Sort.Order.desc("createdTime"), Sort.Order.desc("id"))
         val pageable = PageRequest.of(page_num, 10, Sort.by(sorts))
         
-        return questionJdbcRepo.findQuestionList(pageable)
+        return questionJdbcRepo.findQuestionList(kw, pageable)
     }
 
     fun getQuestion(id: Long): Question {
