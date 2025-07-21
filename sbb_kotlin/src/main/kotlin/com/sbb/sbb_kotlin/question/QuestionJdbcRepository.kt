@@ -1,6 +1,7 @@
 package com.sbb.sbb_kotlin.question
 
 import com.sbb.sbb_kotlin.user.UserInfo
+import java.sql.Timestamp
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageImpl
@@ -8,7 +9,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 
-/* For reading */
 @Repository
 class QuestionJdbcRepository(
     private val jdbc: NamedParameterJdbcTemplate
@@ -166,6 +166,14 @@ class QuestionJdbcRepository(
         }
 
         return PageImpl(content, pageable, total)
+    }
+
+    fun modifyTitleAndContentAndUpdatedAt(id: Long, title: String, content: String, updatedAt: Timestamp) {
+        val sql = "UPDATE QUESTIONS SET title = :title, content = :content, updated_at = :updatedAt WHERE id = :id"
+
+        val params = mapOf("id" to id, "title" to title, "content" to content, "updatedAt" to updatedAt)
+
+        jdbc.update(sql, params)
     }
 
 }

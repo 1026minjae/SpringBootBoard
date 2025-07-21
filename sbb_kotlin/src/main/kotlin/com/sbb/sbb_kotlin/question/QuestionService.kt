@@ -87,7 +87,7 @@ class QuestionService (
 
     fun modify(id: Long, title: String, content: String) {
 
-        questionCrudRepo.modifyTitleAndContentAndUpdatedAt(
+        questionJdbcRepo.modifyTitleAndContentAndUpdatedAt(
             id = id,
             title = title, 
             content = content, 
