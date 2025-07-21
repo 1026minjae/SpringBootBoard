@@ -34,12 +34,53 @@ class QuestionJdbcRepository(
                 content = rs.getString("content"), 
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-                authorId = rs.getLong("author_id")
+                authorId = rs.getLong("author_id"),
+                viewCnt = rs.getLong("view_cnt")
             )
         }
     }
 
     fun findQuestionDetailById(id: Long): QuestionDetail? {
+        val readSql = """
+            SELECT
+                Q.id AS id,
+                Q.title AS title,
+                Q.content AS content,
+                Q.created_time AS created_time,
+                Q.updated_at AS updated_at,
+                U.id AS author_id,
+                U.username AS author_name,
+                COUNT(V.voter_id) AS num_of_voter,
+                Q.view_cnt AS view_cnt
+            FROM QUESTIONS Q 
+                INNER JOIN USERS U ON Q.author_id = U.id
+                LEFT JOIN QUESTION_VOTERS V ON Q.id = V.question_id
+            WHERE Q.id = :id
+            GROUP BY Q.id, Q.title, Q.content, Q.created_time, Q.updated_at, U.id, U.username, Q.view_cnt
+            """.trimIndent()
+
+        val viewCntUpdateSql = "UPDATE QUESTIONS SET view_cnt = view_cnt + 1 WHERE id = :id"
+        
+        val params = MapSqlParameterSource().addValue("id", id)
+
+        jdbc.update(viewCntUpdateSql, params)
+
+        return jdbc.queryForObject(readSql, params) { rs, _ ->
+            QuestionDetail(
+                id = rs.getLong("id"),
+                title = rs.getString("title"), 
+                content = rs.getString("content"), 
+                createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
+                updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
+                answerList = emptyList(),
+                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
+                numOfVoter = rs.getLong("num_of_voter"),
+                viewCnt = rs.getLong("view_cnt")
+            )
+        }
+    }
+
+    fun findQuestionInfoById(id: Long): QuestionInfo? {
         val sql = """
             SELECT
                 Q.id AS id,
@@ -49,26 +90,24 @@ class QuestionJdbcRepository(
                 Q.updated_at AS updated_at,
                 U.id AS author_id,
                 U.username AS author_name,
-                COUNT(V.voter_id) AS num_of_voter
+                Q.view_cnt AS view_cnt
             FROM QUESTIONS Q 
                 INNER JOIN USERS U ON Q.author_id = U.id
-                LEFT JOIN QUESTION_VOTERS V ON Q.id = V.question_id
             WHERE Q.id = :id
-            GROUP BY Q.id, Q.title, Q.content, Q.created_time, Q.updated_at, U.id, U.username
             """.trimIndent()
         
         val params = MapSqlParameterSource().addValue("id", id)
 
         return jdbc.queryForObject(sql, params) { rs, _ ->
-            QuestionDetail(
+            QuestionInfo(
                 id = rs.getLong("id"),
                 title = rs.getString("title"), 
                 content = rs.getString("content"), 
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-                answerList = emptyList(),
-                author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
-                numOfVoter = rs.getLong("num_of_voter")
+                authorId = rs.getLong("author_id"), 
+                authorName = rs.getString("author_name"),
+                viewCnt = rs.getLong("view_cnt")
             )
         }
     }
@@ -97,7 +136,8 @@ class QuestionJdbcRepository(
                 Q.title AS title,
                 Q.created_time AS created_time,
                 COUNT(A.id) AS num_of_answer,
-                U1.username AS author_name
+                U1.username AS author_name,
+                Q.view_cnt AS view_cnt
             FROM QUESTIONS Q
                 INNER JOIN USERS U1 ON Q.author_id = U1.id
                 LEFT JOIN ANSWERS A ON Q.id = A.question_id
@@ -107,7 +147,7 @@ class QuestionJdbcRepository(
                 OR U1.username LIKE '%${keyword}%'
                 OR A.content LIKE '%${keyword}%'
                 OR U2.username LIKE '%${keyword}%'
-            GROUP BY Q.id, Q.title, Q.created_time, U1.username
+            GROUP BY Q.id, Q.title, Q.created_time, U1.username, Q.view_cnt
             ORDER BY Q.created_time DESC LIMIT :limit OFFSET :offset
             """.trimIndent()
 
@@ -120,7 +160,8 @@ class QuestionJdbcRepository(
                 title = rs.getString("title"),
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(),
                 numOfAnswer = rs.getLong("num_of_answer"),
-                authorName = rs.getString("author_name")
+                authorName = rs.getString("author_name"),
+                viewCnt = rs.getLong("view_cnt")
             )
         }
 

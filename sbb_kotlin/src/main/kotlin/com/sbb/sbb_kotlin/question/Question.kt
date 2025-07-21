@@ -19,5 +19,7 @@ data class Question(
     @Column("updated_at")
     var updatedAt: LocalDateTime,
     @Column("author_id")
-    var authorId: Long
+    var authorId: Long,
+    @Column("view_cnt")
+    var viewCnt: Long
 )

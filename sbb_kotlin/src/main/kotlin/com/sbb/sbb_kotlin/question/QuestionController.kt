@@ -68,9 +68,9 @@ class QuestionController (
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
     fun questionDelete(principal: Principal, @PathVariable("id") id: Long): String {
-        val question = questionService.getQuestionDetailWithoutAnswerList(id)
+        val question = questionService.getQuestionInfo(id)
 
-        if (!question.author.username.equals(principal.getName())) {
+        if (!question.authorName.equals(principal.getName())) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to delete")
         }
 
@@ -82,9 +82,9 @@ class QuestionController (
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
     fun questionModify(questionForm: QuestionForm, @PathVariable("id") id: Long, principal: Principal): String {
-        val question = questionService.getQuestionDetailWithoutAnswerList(id)
+        val question = questionService.getQuestionInfo(id)
 
-        if(!question.author.username.equals(principal.getName())) {
+        if(!question.authorName.equals(principal.getName())) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to modify")
         }
         
@@ -106,13 +106,13 @@ class QuestionController (
             return "question_form";
         }
 
-        val question = questionService.getQuestionDetailWithoutAnswerList(id)
+        val question = questionService.getQuestionInfo(id)
 
-        if (!question.author.username.equals(principal.getName())) {
+        if (!question.authorName.equals(principal.getName())) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to modify")
         }
 
-        questionService.modify(question, questionForm.title!!, questionForm.content!!)
+        questionService.modify(question.id, questionForm.title!!, questionForm.content!!)
         
         return "redirect:/question/detail/$id"
     }

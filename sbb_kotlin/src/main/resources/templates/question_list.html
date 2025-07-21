@@ -17,6 +17,7 @@
                     <th>No.</th>
                     <th style="width:50%">Title</th>
                     <th>Author</th>
+                    <th>Views</th>
                     <th>Created</th>
                 </tr>
             </thead>
@@ -31,6 +32,7 @@
                         </span>
                     </td>
                     <td><span th:text="${question.authorName}"></span></td>
+                    <td th:text="${question.viewCnt}"></td>
                     <td th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></td>
                 </tr>
             </tbody>

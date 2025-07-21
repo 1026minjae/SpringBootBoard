@@ -12,5 +12,6 @@ data class QuestionDetail(
     val updatedAt: LocalDateTime,
     var answerList: List<AnswerDetail>,
     var author: UserInfo,
-    val numOfVoter: Long
+    val numOfVoter: Long,
+    val viewCnt: Long
 )

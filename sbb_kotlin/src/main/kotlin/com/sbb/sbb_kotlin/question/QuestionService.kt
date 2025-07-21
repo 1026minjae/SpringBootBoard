@@ -3,6 +3,7 @@ package com.sbb.sbb_kotlin.question
 import com.sbb.sbb_kotlin.DataNotFoundException
 import com.sbb.sbb_kotlin.answer.AnswerJdbcRepository
 import com.sbb.sbb_kotlin.user.UserInfo
+import java.sql.Timestamp
 import java.time.LocalDateTime
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -10,6 +11,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.PageImpl
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class QuestionService (
@@ -25,7 +27,8 @@ class QuestionService (
             content = content,
             createdTime = LocalDateTime.now(),
             updatedAt = LocalDateTime.now(),
-            authorId = user.id
+            authorId = user.id,
+            viewCnt = 0
         )
         questionCrudRepo.save(question)
     }
@@ -41,6 +44,7 @@ class QuestionService (
         return questionJdbcRepo.findQuestionList(kw, pageable)
     }
 
+/* 
     fun getQuestion(id: Long): Question {
         val question = questionJdbcRepo.findQuestionById(id)
 
@@ -51,18 +55,24 @@ class QuestionService (
             throw DataNotFoundException("question not found")
         }
     }
-    
-    fun getQuestionDetail(id: Long): QuestionDetail {
-        val question = getQuestionDetailWithoutAnswerList(id)
-        
-        question.answerList = answerJdbcRepo.findAnswerListByQuestionId(id)
-        
-        return question
-    }
+*/
 
-    fun getQuestionDetailWithoutAnswerList(id: Long): QuestionDetail {
+    @Transactional
+    fun getQuestionDetail(id: Long): QuestionDetail {
         val question = questionJdbcRepo.findQuestionDetailById(id)
         
+        if (question != null) {
+            question.answerList = answerJdbcRepo.findAnswerListByQuestionId(id)
+            return question
+        }
+        else {
+            throw DataNotFoundException("question not found")
+        }
+    }
+
+    fun getQuestionInfo(id: Long): QuestionInfo {
+        val question = questionJdbcRepo.findQuestionInfoById(id)
+
         if (question != null) {
             return question
         }
@@ -75,17 +85,14 @@ class QuestionService (
         return questionVoterRepo.findVotersByQuestionId(id)
     }
 
-    fun modify(question: QuestionDetail, title: String, content: String) {
-        val q = Question(
-            id = question.id,
+    fun modify(id: Long, title: String, content: String) {
+
+        questionCrudRepo.modifyTitleAndContentAndUpdatedAt(
+            id = id,
             title = title, 
             content = content, 
-            createdTime = question.createdTime, 
-            updatedAt = LocalDateTime.now(), 
-            authorId = question.author.id
+            updatedAt = Timestamp.valueOf(LocalDateTime.now())
         )
-
-        questionCrudRepo.save(q)
     }
 
     fun vote(voters: QuestionVoters, newVoter: UserInfo) {

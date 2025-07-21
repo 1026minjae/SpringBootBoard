@@ -34,7 +34,7 @@ class AnswerController (
         bindingResult: BindingResult,
         principal: Principal
     ): String {
-        val question = questionService.getQuestionDetail(id)
+        val question = questionService.getQuestionInfo(id)
 
         val user = userService.getUser(principal.getName())
 

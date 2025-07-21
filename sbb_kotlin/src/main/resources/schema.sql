@@ -6,7 +6,8 @@ CREATE TABLE QUESTIONS (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     created_time TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL,
+    view_cnt BIGINT NOT NULL
 );
 
 CREATE TABLE ANSWERS (

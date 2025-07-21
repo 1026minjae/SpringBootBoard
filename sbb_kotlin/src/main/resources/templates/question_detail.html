@@ -6,15 +6,25 @@
             <div class="card-body">
                 <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
                 <div class="d-flex justify-content-end">
-                    <div th:if="${question.updatedAt != null}" class="badge bg-light text-dark p-2 text-start mx-3">
-                        <div class="mb-2">modified at</div>
-                        <div th:text="${#temporals.format(question.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
-                    </div>
-                    <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="badge bg-light text-dark p-2 text-start mx-3">
                         <div class="mb-2">
+                            Created by
+                        </div>
+                        <div class="text-end">
                             <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
                         </div>
-                        <div th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">Views</div>
+                        <div class="text-end" th:text="${question.viewCnt}"></div>
+                    </div>
+                    <div class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">Created at</div>
+                        <div class="text-end" th:text="${#temporals.format(question.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                    <div th:if="${question.updatedAt != null}" class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">Last modified at</div>
+                        <div class="text-end" th:text="${#temporals.format(question.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
                     </div>
                 </div>
             </div>
@@ -44,15 +54,19 @@
             <div class="card-body">
                 <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
                 <div class="d-flex justify-content-end">
-                    <div th:if="${answer.updatedAt != null}" class="badge bg-light text-dark p-2 text-start mx-3">
-                        <div class="mb-2">modified at</div>
-                        <div th:text="${#temporals.format(answer.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
-                    </div>
                     <div class="badge bg-light text-dark p-2 text-start">
-                        <div class="mb-2">
+                        <div class="mb-2">Created by</div>
+                        <div class="text-end">
                             <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
                         </div>
-                        <div th:text="${#temporals.format(answer.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                    <div class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">Created at</div>
+                        <div class="text-end" th:text="${#temporals.format(answer.createdTime, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                    <div th:if="${answer.updatedAt != null}" class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">Last modified at</div>
+                        <div class="text-end" th:text="${#temporals.format(answer.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
                     </div>
                 </div>
                 <div class="m-3">
