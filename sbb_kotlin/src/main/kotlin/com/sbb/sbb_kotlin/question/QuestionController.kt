@@ -21,7 +21,6 @@ import org.springframework.web.server.ResponseStatusException
 @Controller
 class QuestionController (
     private val questionService: QuestionService,
-    private val answerService: AnswerService,
     private val userService: UserService
 ) {
 
@@ -47,8 +46,13 @@ class QuestionController (
     }
 
     @GetMapping("/detail/{id}")
-    fun detail(model: Model, @PathVariable("id") id: Long, answerForm: AnswerForm): String {
-        val question = questionService.getQuestionDetail(id)
+    fun detail(
+        model: Model, 
+        @PathVariable("id") id: Long, 
+        @RequestParam(value="page", defaultValue="0") page: Int,
+        answerForm: AnswerForm
+    ): String {
+        val question = questionService.getQuestionDetail(id, page)
         model.addAttribute("question", question)
         return "question_detail"
     }

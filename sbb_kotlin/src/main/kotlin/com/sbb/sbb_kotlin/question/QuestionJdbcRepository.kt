@@ -48,7 +48,7 @@ class QuestionJdbcRepository(
                 content = rs.getString("content"), 
                 createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-                answerList = emptyList(),
+                answers = null,
                 author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
                 numOfVoter = rs.getLong("num_of_voter"),
                 viewCnt = rs.getLong("view_cnt"),

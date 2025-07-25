@@ -48,11 +48,13 @@ class QuestionService (
     }
 
     @Transactional
-    fun getQuestionDetail(id: Long): QuestionDetail {
+    fun getQuestionDetail(id: Long, page_num: Int): QuestionDetail {
         val question = questionJdbcRepo.findQuestionDetailById(id)
+        val sorts = listOf(Sort.Order.asc("createdTime"), Sort.Order.asc("id"))
+        val pageable = PageRequest.of(page_num, 10, Sort.by(sorts))
         
         if (question != null) {
-            question.answerList = answerJdbcRepo.findAnswerListByQuestionId(id)
+            question.answers = answerJdbcRepo.findAnswersByQuestionId(id, pageable)
             return question
         }
         else {

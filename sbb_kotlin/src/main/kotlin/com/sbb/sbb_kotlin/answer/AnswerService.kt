@@ -42,11 +42,7 @@ class AnswerService (
     fun getAnswerVoters(id: Long): AnswerVoters {
         return answerVoterRepo.findVotersByAnswerId(id)
     }
-
-    fun getList(qid: Long): List<AnswerDetail> {
-        return answerJdbcRepo.findAnswerListByQuestionId(qid)
-    }
-
+    
     fun getQuestionIdForAnswer(aid: Long): Long {
         val qid = answerJdbcRepo.findQuestionIdById(aid)
 

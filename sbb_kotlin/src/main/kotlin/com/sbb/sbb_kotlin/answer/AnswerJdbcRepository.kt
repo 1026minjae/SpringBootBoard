@@ -1,8 +1,10 @@
 package com.sbb.sbb_kotlin.answer
 
-import com.sbb.sbb_kotlin.answer.AnswerDetail
 import com.sbb.sbb_kotlin.user.UserInfo
 import java.time.LocalDateTime
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.PageImpl
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
@@ -46,8 +48,18 @@ class AnswerJdbcRepository(
         }
     }
 
-    fun findAnswerListByQuestionId(questionId: Long): List<AnswerDetail> {
-        val sql = """
+    fun findAnswersByQuestionId(questionId: Long, pageable: Pageable): Page<AnswerDetail> {
+        val limit = pageable.pageSize
+        val offset = pageable.pageNumber * pageable.pageSize
+
+        val countQuery = """
+            SELECT 
+                COUNT(DISTINCT A.id) 
+            FROM ANSWERS A
+            WHERE A.question_id = :qid
+            """.trimIndent()
+        
+        val dataQuery = """
             SELECT 
                 A.id AS id,
                 A.question_id AS question_id,
@@ -62,21 +74,25 @@ class AnswerJdbcRepository(
                 LEFT JOIN ANSWER_VOTERS V ON A.id = V.answer_id
             WHERE A.question_id = :qid
             GROUP BY A.id, A.question_id, A.content, A.created_time, A.updated_at, U.id, U.username
+            ORDER BY A.created_time DESC LIMIT :limit OFFSET :offset
             """.trimIndent()
 
-        val params = MapSqlParameterSource().addValue("qid", questionId)
+        val params = mapOf("limit" to limit, "offset" to offset, "qid" to questionId)
 
-        return jdbc.query(sql, params) { rs, _ ->
+        val total = jdbc.queryForObject(countQuery, mapOf("qid" to questionId), Long::class.java) ?: 0
+        val content = jdbc.query(dataQuery, params) { rs, _ ->
             AnswerDetail(
                 id = rs.getLong("id"),
-                questionId = rs.getLong("question_id"), 
-                content = rs.getString("content"), 
-                createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
+                questionId = rs.getLong("question_id"),
+                content = rs.getString("content"),
+                createdTime = rs.getTimestamp("created_time").toLocalDateTime(),
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
                 author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
                 numOfVoter = rs.getLong("num_of_voter")
             )
         }
+
+        return PageImpl(content, pageable, total)
     }
 
     fun findQuestionIdById(id: Long): Long? {
