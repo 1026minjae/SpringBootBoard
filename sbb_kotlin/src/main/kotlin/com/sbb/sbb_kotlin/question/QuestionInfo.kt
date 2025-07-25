@@ -10,5 +10,6 @@ data class QuestionInfo(
     val updatedAt: LocalDateTime,
     val authorId: Long,
     val authorName: String,
-    val viewCnt: Long
+    val viewCnt: Long,
+    val categoryId: Long
 )

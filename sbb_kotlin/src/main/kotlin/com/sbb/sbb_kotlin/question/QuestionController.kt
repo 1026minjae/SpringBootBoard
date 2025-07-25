@@ -42,7 +42,7 @@ class QuestionController (
         if (bindingResult.hasErrors()) {
             return "question_form"
         }
-        questionService.create(questionForm.title!!, questionForm.content!!, user)
+        questionService.create(questionForm.title!!, questionForm.content!!, user, questionForm.categoryId)
         return "redirect:/question/list"
     }
 
@@ -57,11 +57,13 @@ class QuestionController (
     fun list(
         model: Model, 
         @RequestParam(value="page", defaultValue="0") page: Int,
-        @RequestParam(value="kw", defaultValue="") kw: String
+        @RequestParam(value="kw", defaultValue="") kw: String,
+        @RequestParam(value="category", defaultValue="0") category: Int
     ): String {
-        val paging = questionService.getList(page, kw)
+        val paging = questionService.getList(page, kw, category)
         model.addAttribute("paging", paging)
         model.addAttribute("kw", kw)
+        model.addAttribute("category", category)
         return "question_list"
     }
 
@@ -90,6 +92,7 @@ class QuestionController (
         
         questionForm.title = question.title
         questionForm.content = question.content
+        questionForm.categoryId = question.categoryId
         
         return "question_form";
     }
@@ -112,7 +115,7 @@ class QuestionController (
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No permission to modify")
         }
 
-        questionService.modify(question.id, questionForm.title!!, questionForm.content!!)
+        questionService.modify(question.id, questionForm.title!!, questionForm.content!!, questionForm.categoryId)
         
         return "redirect:/question/detail/$id"
     }

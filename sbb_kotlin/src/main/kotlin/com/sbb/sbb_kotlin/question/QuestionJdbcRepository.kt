@@ -13,33 +13,6 @@ import org.springframework.stereotype.Repository
 class QuestionJdbcRepository(
     private val jdbc: NamedParameterJdbcTemplate
 ) {
-
-    fun checkIfGivenQuestionExists(id: Long): Boolean {
-        val sql = "SELECT COUNT(*) FROM QUESTIONS WHERE id = :id"
-        val params = MapSqlParameterSource().addValue("id", id)
-        val result = jdbc.queryForObject(sql, params, Long::class.java) ?: 0
-
-        return (result > 0)
-    }
-
-    fun findQuestionById(id: Long): Question? {
-        val sql = "SELECT * FROM QUESTIONS WHERE id = :id"
-        
-        val params = MapSqlParameterSource().addValue("id", id)
-
-        return jdbc.queryForObject(sql, params) { rs, _ ->
-            Question(
-                id = rs.getLong("id"),
-                title = rs.getString("title"), 
-                content = rs.getString("content"), 
-                createdTime = rs.getTimestamp("created_time").toLocalDateTime(), 
-                updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
-                authorId = rs.getLong("author_id"),
-                viewCnt = rs.getLong("view_cnt")
-            )
-        }
-    }
-
     fun findQuestionDetailById(id: Long): QuestionDetail? {
         val readSql = """
             SELECT
@@ -51,12 +24,15 @@ class QuestionJdbcRepository(
                 U.id AS author_id,
                 U.username AS author_name,
                 COUNT(V.voter_id) AS num_of_voter,
-                Q.view_cnt AS view_cnt
+                Q.view_cnt AS view_cnt,
+                C.id AS category_id,
+                C.label AS category_label
             FROM QUESTIONS Q 
                 INNER JOIN USERS U ON Q.author_id = U.id
                 LEFT JOIN QUESTION_VOTERS V ON Q.id = V.question_id
+                INNER JOIN CATEGORIES C ON Q.category_id = C.id
             WHERE Q.id = :id
-            GROUP BY Q.id, Q.title, Q.content, Q.created_time, Q.updated_at, U.id, U.username, Q.view_cnt
+            GROUP BY Q.id, Q.title, Q.content, Q.created_time, Q.updated_at, U.id, U.username, Q.view_cnt, C.id, C.label
             """.trimIndent()
 
         val viewCntUpdateSql = "UPDATE QUESTIONS SET view_cnt = view_cnt + 1 WHERE id = :id"
@@ -75,7 +51,8 @@ class QuestionJdbcRepository(
                 answerList = emptyList(),
                 author = UserInfo(rs.getLong("author_id"), rs.getString("author_name")),
                 numOfVoter = rs.getLong("num_of_voter"),
-                viewCnt = rs.getLong("view_cnt")
+                viewCnt = rs.getLong("view_cnt"),
+                category = Category(rs.getLong("category_id"), rs.getString("category_label"))
             )
         }
     }
@@ -90,9 +67,11 @@ class QuestionJdbcRepository(
                 Q.updated_at AS updated_at,
                 U.id AS author_id,
                 U.username AS author_name,
-                Q.view_cnt AS view_cnt
+                Q.view_cnt AS view_cnt,
+                C.id AS category_id
             FROM QUESTIONS Q 
                 INNER JOIN USERS U ON Q.author_id = U.id
+                INNER JOIN CATEGORIES C ON Q.category_id = C.id
             WHERE Q.id = :id
             """.trimIndent()
         
@@ -107,12 +86,13 @@ class QuestionJdbcRepository(
                 updatedAt = rs.getTimestamp("updated_at").toLocalDateTime(),
                 authorId = rs.getLong("author_id"), 
                 authorName = rs.getString("author_name"),
-                viewCnt = rs.getLong("view_cnt")
+                viewCnt = rs.getLong("view_cnt"),
+                categoryId = rs.getLong("category_id")
             )
         }
     }
 
-    fun findQuestionList(keyword: String, pageable: Pageable): Page<QuestionListEntry> {
+    fun findQuestionList(keyword: String, pageable: Pageable, category: Int): Page<QuestionListEntry> {
         val limit = pageable.pageSize
         val offset = pageable.pageNumber * pageable.pageSize
 
@@ -123,11 +103,12 @@ class QuestionJdbcRepository(
                 INNER JOIN USERS U1 ON Q.author_id = U1.id
                 LEFT JOIN ANSWERS A ON Q.id = A.question_id
                 LEFT JOIN USERS U2 ON A.author_id = U2.id
-            WHERE Q.title LIKE '%${keyword}%'
+            WHERE Q.category_id = :categoryId
+                AND (Q.title LIKE '%${keyword}%'
                 OR Q.content LIKE '%${keyword}%'
                 OR U1.username LIKE '%${keyword}%'
                 OR A.content LIKE '%${keyword}%'
-                OR U2.username LIKE '%${keyword}%'
+                OR U2.username LIKE '%${keyword}%')
             """.trimIndent()
         
         val dataQuery = """
@@ -142,18 +123,19 @@ class QuestionJdbcRepository(
                 INNER JOIN USERS U1 ON Q.author_id = U1.id
                 LEFT JOIN ANSWERS A ON Q.id = A.question_id
                 LEFT JOIN USERS U2 ON A.author_id = U2.id
-            WHERE Q.title LIKE '%${keyword}%'
+            WHERE Q.category_id = :categoryId
+                AND (Q.title LIKE '%${keyword}%'
                 OR Q.content LIKE '%${keyword}%'
                 OR U1.username LIKE '%${keyword}%'
                 OR A.content LIKE '%${keyword}%'
-                OR U2.username LIKE '%${keyword}%'
+                OR U2.username LIKE '%${keyword}%')
             GROUP BY Q.id, Q.title, Q.created_time, U1.username, Q.view_cnt
             ORDER BY Q.created_time DESC LIMIT :limit OFFSET :offset
             """.trimIndent()
 
-        val params = mapOf("limit" to limit, "offset" to offset)
+        val params = mapOf("limit" to limit, "offset" to offset, "categoryId" to category)
 
-        val total = jdbc.queryForObject(countQuery, emptyMap<String, Any>(), Long::class.java) ?: 0
+        val total = jdbc.queryForObject(countQuery, mapOf("categoryId" to category), Long::class.java) ?: 0
         val content = jdbc.query(dataQuery, params) { rs, _ ->
             QuestionListEntry(
                 id = rs.getLong("id"),
@@ -168,10 +150,10 @@ class QuestionJdbcRepository(
         return PageImpl(content, pageable, total)
     }
 
-    fun modifyTitleAndContentAndUpdatedAt(id: Long, title: String, content: String, updatedAt: Timestamp) {
-        val sql = "UPDATE QUESTIONS SET title = :title, content = :content, updated_at = :updatedAt WHERE id = :id"
+    fun modifyTitleContentUpdatedAtCategoryId(id: Long, title: String, content: String, updatedAt: Timestamp, categoryId: Long) {
+        val sql = "UPDATE QUESTIONS SET title = :title, content = :content, updated_at = :updatedAt, category_id = :categoryId WHERE id = :id"
 
-        val params = mapOf("id" to id, "title" to title, "content" to content, "updatedAt" to updatedAt)
+        val params = mapOf("id" to id, "title" to title, "content" to content, "updatedAt" to updatedAt, "categoryId" to categoryId)
 
         jdbc.update(sql, params)
     }

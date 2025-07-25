@@ -2,6 +2,7 @@
 
 CREATE TABLE QUESTIONS (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    category_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
@@ -30,11 +31,18 @@ CREATE TABLE USERS (
 CREATE TABLE QUESTION_VOTERS (
     question_id BIGINT,
     voter_id BIGINT,
-    PRIMARY KEY (question_id, voter_id)
+    PRIMARY KEY (question_id, voter_id),
+    FOREIGN KEY (question_id) REFERENCES QUESTIONS(id) ON DELETE CASCADE
 );
 
 CREATE TABLE ANSWER_VOTERS (
     answer_id BIGINT,
     voter_id BIGINT,
-    PRIMARY KEY (answer_id, voter_id)
+    PRIMARY KEY (answer_id, voter_id),
+    FOREIGN KEY (answer_id) REFERENCES ANSWERS(id) ON DELETE CASCADE
+);
+
+CREATE TABLE CATEGORIES (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    label VARCHAR(255) NOT NULL
 );

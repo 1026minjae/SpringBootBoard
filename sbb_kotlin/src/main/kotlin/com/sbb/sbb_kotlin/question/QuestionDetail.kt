@@ -13,5 +13,6 @@ data class QuestionDetail(
     var answerList: List<AnswerDetail>,
     var author: UserInfo,
     val numOfVoter: Long,
-    val viewCnt: Long
+    val viewCnt: Long,
+    val category: Category
 )

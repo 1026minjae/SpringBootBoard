@@ -1,5 +1,18 @@
 <html layout:decorate="~{layout}">
     <div layout:fragment="content" class="container my-3">
+        <!-- Category change -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${category == 0} ? 'active'" 
+                    href="javascript:void(0)" onclick="changeCategory(0)">General</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${category == 1} ? 'active'" 
+                    href="javascript:void(0)" onclick="changeCategory(1)">Tech</a>
+            </li>
+        </ul>
+
+        <!-- Tool bar -->
         <div class="row my-3">
             <div class="col-6">
                 <a th:href="@{/question/create}" class="btn btn-primary">Add question</a>
@@ -11,6 +24,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Question List -->
         <table class="table">
             <thead class="table-dark">
                 <tr class="text-center">
@@ -60,10 +75,11 @@
             </ul>
         </div>
 
-        <!-- Search keyword -->
+        <!-- Parameter -->
         <form th:action="@{/question/list}" method="get" id="searchForm">
             <input type="hidden" id="kw" name="kw" th:value="${kw}">
             <input type="hidden" id="page" name="page" th:value="${paging.number}">
+            <input type="hidden" id="category" name="category" th:value="${category}">
         </form>
     </div>
 
@@ -82,5 +98,11 @@
             document.getElementById('page').value = 0;
             document.getElementById('searchForm').submit();
         });
+
+        function changeCategory(category) {
+            document.getElementById('category').value = category;
+            document.getElementById('page').value = 0;
+            document.getElementById('searchForm').submit();
+        }
     </script>
 </html>

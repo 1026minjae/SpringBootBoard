@@ -21,41 +21,31 @@ class QuestionService (
     private val answerJdbcRepo: AnswerJdbcRepository
 ) {
 
-    fun create(title: String, content: String, user: UserInfo) {
+    @Transactional
+    fun create(title: String, content: String, user: UserInfo, categoryId: Long) {
         val question = Question(
             title = title,
             content = content,
             createdTime = LocalDateTime.now(),
             updatedAt = LocalDateTime.now(),
             authorId = user.id,
-            viewCnt = 0
+            viewCnt = 0,
+            categoryId = categoryId
         )
         questionCrudRepo.save(question)
     }
 
+    @Transactional
     fun delete(id: Long) {
         questionCrudRepo.deleteById(id)
     }
 
-    fun getList(page_num: Int, kw: String): Page<QuestionListEntry> {
+    fun getList(page_num: Int, kw: String, category: Int): Page<QuestionListEntry> {
         val sorts = listOf(Sort.Order.desc("createdTime"), Sort.Order.desc("id"))
         val pageable = PageRequest.of(page_num, 10, Sort.by(sorts))
         
-        return questionJdbcRepo.findQuestionList(kw, pageable)
+        return questionJdbcRepo.findQuestionList(kw, pageable, category)
     }
-
-/* 
-    fun getQuestion(id: Long): Question {
-        val question = questionJdbcRepo.findQuestionById(id)
-
-        if (question != null) {
-            return question
-        }
-        else {
-            throw DataNotFoundException("question not found")
-        }
-    }
-*/
 
     @Transactional
     fun getQuestionDetail(id: Long): QuestionDetail {
@@ -85,16 +75,18 @@ class QuestionService (
         return questionVoterRepo.findVotersByQuestionId(id)
     }
 
-    fun modify(id: Long, title: String, content: String) {
-
-        questionJdbcRepo.modifyTitleAndContentAndUpdatedAt(
+    @Transactional
+    fun modify(id: Long, title: String, content: String, categoryId: Long) {
+        questionJdbcRepo.modifyTitleContentUpdatedAtCategoryId(
             id = id,
             title = title, 
             content = content, 
-            updatedAt = Timestamp.valueOf(LocalDateTime.now())
+            updatedAt = Timestamp.valueOf(LocalDateTime.now()),
+            categoryId = categoryId
         )
     }
 
+    @Transactional
     fun vote(voters: QuestionVoters, newVoter: UserInfo) {
         if (!voters.voters.contains(newVoter.id)) {
             questionVoterRepo.addNewVoter(voters.questionId, newVoter.id)

@@ -9,5 +9,7 @@ class QuestionForm(
     var title: String?,
     
     @field:NotEmpty(message="Content is necessary")
-    var content: String?
+    var content: String?,
+
+    var categoryId: Long = 0
 )

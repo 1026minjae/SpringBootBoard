@@ -21,5 +21,7 @@ data class Question(
     @Column("author_id")
     var authorId: Long,
     @Column("view_cnt")
-    var viewCnt: Long
+    var viewCnt: Long,
+    @Column("category_id")
+    var categoryId: Long
 )

@@ -5,6 +5,15 @@
         <form th:object="${questionForm}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+
+             <div class="mb-3">
+                <label for="categoryId" class="form-label">Choose Category</label>
+                <select th:field="*{categoryId}" class="form-select" id="categoryId">
+                    <option value=0>General</option>
+                    <option value=1>Tech</option>
+                </select>
+            </div>
+
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input type="text" th:field="*{title}" class="form-control">
