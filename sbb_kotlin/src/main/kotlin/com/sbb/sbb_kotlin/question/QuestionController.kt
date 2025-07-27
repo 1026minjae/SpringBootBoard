@@ -37,11 +37,14 @@ class QuestionController (
         bindingResult: BindingResult,
         principal: Principal
     ): String {
-        val user = userService.getUser(principal.getName())
         if (bindingResult.hasErrors()) {
             return "question_form"
         }
+
+        val user = userService.getUser(principal.getName())
+        
         questionService.create(questionForm.title!!, questionForm.content!!, user, questionForm.categoryId)
+        
         return "redirect:/question/list"
     }
 

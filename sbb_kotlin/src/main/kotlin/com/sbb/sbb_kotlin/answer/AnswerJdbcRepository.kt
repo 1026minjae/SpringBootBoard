@@ -27,7 +27,7 @@ class AnswerJdbcRepository(
                 U.username AS author_name,
                 COUNT(V.voter_id) AS num_of_voter
             FROM ANSWERS A
-                INNER JOIN USERS U ON A.author_id = U.id
+                LEFT JOIN USERS U ON A.author_id = U.id
                 LEFT JOIN ANSWER_VOTERS V ON A.id = V.answer_id
             WHERE A.id = :id
             GROUP BY A.id, A.question_id, A.content, A.created_time, A.updated_at, U.id, U.username
@@ -70,11 +70,11 @@ class AnswerJdbcRepository(
                 U.username AS author_name,
                 COUNT(V.voter_id) AS num_of_voter
             FROM ANSWERS A
-                INNER JOIN USERS U ON A.author_id = U.id
+                LEFT JOIN USERS U ON A.author_id = U.id
                 LEFT JOIN ANSWER_VOTERS V ON A.id = V.answer_id
             WHERE A.question_id = :qid
             GROUP BY A.id, A.question_id, A.content, A.created_time, A.updated_at, U.id, U.username
-            ORDER BY A.created_time DESC LIMIT :limit OFFSET :offset
+            ORDER BY A.created_time ASC LIMIT :limit OFFSET :offset
             """.trimIndent()
 
         val params = mapOf("limit" to limit, "offset" to offset, "qid" to questionId)

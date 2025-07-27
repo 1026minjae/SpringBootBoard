@@ -28,7 +28,7 @@ class QuestionJdbcRepository(
                 C.id AS category_id,
                 C.label AS category_label
             FROM QUESTIONS Q 
-                INNER JOIN USERS U ON Q.author_id = U.id
+                LEFT JOIN USERS U ON Q.author_id = U.id
                 LEFT JOIN QUESTION_VOTERS V ON Q.id = V.question_id
                 INNER JOIN CATEGORIES C ON Q.category_id = C.id
             WHERE Q.id = :id
@@ -70,7 +70,7 @@ class QuestionJdbcRepository(
                 Q.view_cnt AS view_cnt,
                 C.id AS category_id
             FROM QUESTIONS Q 
-                INNER JOIN USERS U ON Q.author_id = U.id
+                LEFT JOIN USERS U ON Q.author_id = U.id
                 INNER JOIN CATEGORIES C ON Q.category_id = C.id
             WHERE Q.id = :id
             """.trimIndent()
@@ -100,7 +100,7 @@ class QuestionJdbcRepository(
             SELECT 
                 COUNT(DISTINCT Q.id) 
             FROM QUESTIONS Q
-                INNER JOIN USERS U1 ON Q.author_id = U1.id
+                LEFT JOIN USERS U1 ON Q.author_id = U1.id
                 LEFT JOIN ANSWERS A ON Q.id = A.question_id
                 LEFT JOIN USERS U2 ON A.author_id = U2.id
             WHERE Q.category_id = :categoryId
@@ -120,7 +120,7 @@ class QuestionJdbcRepository(
                 U1.username AS author_name,
                 Q.view_cnt AS view_cnt
             FROM QUESTIONS Q
-                INNER JOIN USERS U1 ON Q.author_id = U1.id
+                LEFT JOIN USERS U1 ON Q.author_id = U1.id
                 LEFT JOIN ANSWERS A ON Q.id = A.question_id
                 LEFT JOIN USERS U2 ON A.author_id = U2.id
             WHERE Q.category_id = :categoryId

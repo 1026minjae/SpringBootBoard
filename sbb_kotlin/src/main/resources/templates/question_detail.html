@@ -1,7 +1,7 @@
 <html layout:decorate="~{layout}">
     <div layout:fragment="content" class="container my-3">
         <!-- Question -->
-        <h2 class="border-bottom py-2" th:text="${'[' + question.category.label + '] ' + question.title}"></h2>
+        <h2 class="border-bottom py-2" th:text="|[${question.category.label}] ${question.title}|"></h2>
         <div class="card my-3">
             <div class="card-body">
                 <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
@@ -29,6 +29,10 @@
                 </div>
             </div>
             <div class="m-3">
+                <button id="loadQuestionComment" class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#questionCommentBox"
+                    aria-expanded="false" aria-controls="questionCommentBox" th:data-target="${question.id}">
+                    See Comments
+                </button>
                 <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
                     th:data-uri="@{|/question/vote/${question.id}|}">
                     Recommend
@@ -42,6 +46,16 @@
                     class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
                     th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
                     th:text="Delete"></a>
+                <div class="collapse mt-2" id="questionCommentBox">
+                    <div id="questionComments"></div>
+                    <!-- New comment box -->
+                    <div class="my-3">
+                        <textarea sec:authorize="isAnonymous()" disabled name="content" rows="5" class="form-control"></textarea>
+                        <textarea sec:authorize="isAuthenticated()" id="questionNewComment" rows="5" class="form-control"></textarea>
+                        <a href="javascript:void(0)" class="create-comment btn btn-primary mt-2"
+                            th:data-type="0" th:data-target="${question.id}" th:data-content="questionNewComment">Add Comment</a>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -70,6 +84,11 @@
                     </div>
                 </div>
                 <div class="m-3">
+                    <button class="btn btn-sm btn-outline-primary load-answer-comment" type="button" data-bs-toggle="collapse" 
+                        th:data-bs-target="|#answerCommentBox_${answer.id}|" th:data-target="${answer.id}"
+                        aria-expanded="false" th:aria-controls="|answerCommentBox_${answer.id}|" >
+                        See Comments
+                    </button>
                     <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
                         th:data-uri="@{|/answer/vote/${answer.id}|}">
                         Recommend
@@ -83,6 +102,16 @@
                         class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
                         th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
                         th:text="Delete"></a>
+                    <div class="collapse mt-2" th:id="|answerCommentBox_${answer.id}|">
+                        <div th:id="|answerComments_${answer.id}|"></div>
+                        <!-- New comment box -->
+                        <div class="my-3">
+                            <textarea sec:authorize="isAnonymous()" disabled name="content" rows="5" class="form-control"></textarea>
+                            <textarea sec:authorize="isAuthenticated()" th:id="|answerNewComment_${answer.id}|" rows="5" class="form-control"></textarea>
+                            <a href="javascript:void(0)" class="create-comment btn btn-primary mt-2"
+                                th:data-type="1" th:data-target="${answer.id}" th:data-content="|answerNewComment_${answer.id}|">Add Comment</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,13 +146,37 @@
             <input type="submit" value="Add answer" class="btn btn-primary my-2">
         </form>
 
-        <!-- Parameter -->
+        <!-- Paging Parameter -->
         <form th:action="@{|/question/detail/${question.id}|}" method="get" id="pagingForm">
             <input type="hidden" id="page" name="page" th:value="${question.answers.number}">
         </form>
+
+        <!-- Comment Creation Parameter -->
+        <form th:action="@{|/comment/create|}" method="post" id="commentForm">
+            <input type="hidden" id="commentForm_type" name="type">
+            <input type="hidden" id="commentForm_target" name="target">
+            <input type="hidden" id="commentForm_content" name="content">
+            <input type="hidden" name="qid" th:value="${question.id}">
+            <input type="hidden" name="page" th:value="${question.answers.number}">
+        </form>
+
+        <!-- Auth Status -->
+        <div id="authStatus" sec:authorize="isAuthenticated()" data-authenticated="true"></div>
+        <div id="authStatus" sec:authorize="isAnonymous()" data-authenticated="false"></div>
+
+        <!-- Logged-In Username -->
+        <div id="loggedInUsername" sec:authorize="isAuthenticated()" th:data-value="${#authentication.getPrincipal().getUsername()}"></div>
+        <div id="loggedInUsername" sec:authorize="isAnonymous()" data-value=""></div>
+
+        <!-- Question Info -->
+        <div id="questionId" th:data-value="${question.id}"></div>
     </div>
 
     <script layout:fragment="script" type='text/javascript'>
+        const authStatus = document.getElementById("authStatus").dataset.authenticated;
+        const loggedInUsername = document.getElementById("loggedInUsername").dataset.value;
+        const questionId = document.getElementById("questionId").dataset.value;
+
         const delete_elements = document.getElementsByClassName("delete");
         Array.from(delete_elements).forEach(function(element) {
             element.addEventListener('click', function() {
@@ -149,5 +202,242 @@
                 document.getElementById('pagingForm').submit();
             });
         });
+
+        const loadQuestionComment = document.getElementById("loadQuestionComment");
+        loadQuestionComment.addEventListener('click', function() {
+            fetch("/comment/load?type=0&target="+this.dataset.target)
+                .then(res => res.json())
+                .then(comments => {
+                    const questionComments = document.getElementById("questionComments");
+                    questionComments.innerHTML = "";
+
+                    comments.forEach(comment => {
+                        const card = document.createElement("div");
+                        card.className = "card card-body my-3";
+
+                        const cardText = document.createElement("div");
+                        cardText.className = "card-text";
+                        cardText.innerHTML = comment.content;
+
+                        const metaWrapper = document.createElement("div");
+                        metaWrapper.className = "d-flex justify-content-end";
+
+                        const authorBadge = document.createElement("div");
+                        authorBadge.className = "badge bg-light text-dark p-2 text-start";
+
+                        const authorLabel = document.createElement("div");
+                        authorLabel.className = "mb-2";
+                        authorLabel.innerText = "Created by";
+
+                        const authorName = document.createElement("div");
+                        authorName.className = "text-end";
+                        authorName.innerText = comment.author.username;
+
+                        authorBadge.appendChild(authorLabel);
+                        authorBadge.appendChild(authorName);
+
+                        const createdTimeBadge = document.createElement("div");
+                        createdTimeBadge.className = "badge bg-light text-dark p-2 text-start mx-3";
+
+                        const createdTimeLabel = document.createElement("div");
+                        createdTimeLabel.className = "mb-2";
+                        createdTimeLabel.innerText = "Created at";
+
+                        const createdTimeValue = document.createElement("div");
+                        createdTimeValue.className = "text-end";
+                        const createdTime = new Date(comment.createdTime);
+                        var yyyy = createdTime.getFullYear();
+                        var mm = String(createdTime.getMonth() + 1).padStart(2, '0');
+                        var dd = String(createdTime.getDate()).padStart(2, '0');
+                        var hh = String(createdTime.getHours()).padStart(2, '0');
+                        var min = String(createdTime.getMinutes()).padStart(2, '0');
+                        createdTimeValue.innerText = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+                        createdTimeBadge.appendChild(createdTimeLabel);
+                        createdTimeBadge.appendChild(createdTimeValue);
+
+                        const updatedAtBadge = document.createElement("div");
+                        updatedAtBadge.className = "badge bg-light text-dark p-2 text-start";
+
+                        const updatedAtLabel = document.createElement("div");
+                        updatedAtLabel.className = "mb-2";
+                        updatedAtLabel.innerText = "Last modified at";
+
+                        const updatedAtValue = document.createElement("div");
+                        updatedAtValue.className = "text-end";
+                        const updatedAt = new Date(comment.updatedAt);
+                        var yyyy = updatedAt.getFullYear();
+                        var mm = String(updatedAt.getMonth() + 1).padStart(2, '0');
+                        var dd = String(updatedAt.getDate()).padStart(2, '0');
+                        var hh = String(updatedAt.getHours()).padStart(2, '0');
+                        var min = String(updatedAt.getMinutes()).padStart(2, '0');
+                        updatedAtValue.innerText = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+                        updatedAtBadge.appendChild(updatedAtLabel);
+                        updatedAtBadge.appendChild(updatedAtValue);
+
+                        metaWrapper.appendChild(authorBadge);
+                        metaWrapper.appendChild(createdTimeBadge);
+                        metaWrapper.appendChild(updatedAtBadge);
+
+                        card.appendChild(cardText);
+                        card.appendChild(metaWrapper);
+
+                        if (authStatus && comment.author.username == loggedInUsername) {
+                            const btnWrapper = document.createElement("div");
+                            btnWrapper.className = "m-3";
+
+                            const modifyBtn = document.createElement("a");
+                            modifyBtn.href = `/comment/modify/${comment.id}?return=${questionId}`;
+                            modifyBtn.className = "btn btn-sm btn-outline-secondary";
+                            modifyBtn.innerHTML = "Modify";
+
+                            const deleteBtn = document.createElement("a");
+                            deleteBtn.href = "javascript:void(0);";
+                            deleteBtn.className = "btn btn-sm btn-outline-secondary mx-2";
+                            deleteBtn.dataset.uri = `/comment/delete/${comment.id}?return=${questionId}`;
+                            deleteBtn.innerHTML = "Delete";
+                            deleteBtn.addEventListener('click', function() {
+                                if(confirm("Do you really want to delete this?")) {
+                                    location.href = this.dataset.uri;
+                                };
+                            });
+
+                            btnWrapper.appendChild(modifyBtn);
+                            btnWrapper.appendChild(deleteBtn);
+
+                            card.appendChild(btnWrapper);
+                        }
+
+                        questionComments.appendChild(card);
+                    });
+                }
+            );
+        });
+
+        const loadAnswerComment = document.getElementsByClassName("load-answer-comment");
+        Array.from(loadAnswerComment).forEach(lac => {
+            lac.addEventListener('click', function() {
+                fetch("/comment/load?type=1&target="+this.dataset.target)
+                    .then(res => res.json())
+                    .then(comments => {
+                        const answerComments = document.getElementById("answerComments_"+this.dataset.target);
+                        answerComments.innerHTML = "";
+
+                        comments.forEach(comment => {
+                            const card = document.createElement("div");
+                            card.className = "card card-body my-3";
+
+                            const cardText = document.createElement("div");
+                            cardText.className = "card-text";
+                            cardText.innerHTML = comment.content;
+
+                            const metaWrapper = document.createElement("div");
+                            metaWrapper.className = "d-flex justify-content-end";
+
+                            const authorBadge = document.createElement("div");
+                            authorBadge.className = "badge bg-light text-dark p-2 text-start";
+
+                            const authorLabel = document.createElement("div");
+                            authorLabel.className = "mb-2";
+                            authorLabel.innerText = "Created by";
+
+                            const authorName = document.createElement("div");
+                            authorName.className = "text-end";
+                            authorName.innerText = comment.author.username;
+
+                            authorBadge.appendChild(authorLabel);
+                            authorBadge.appendChild(authorName);
+
+                            const createdTimeBadge = document.createElement("div");
+                            createdTimeBadge.className = "badge bg-light text-dark p-2 text-start mx-3";
+
+                            const createdTimeLabel = document.createElement("div");
+                            createdTimeLabel.className = "mb-2";
+                            createdTimeLabel.innerText = "Created at";
+
+                            const createdTimeValue = document.createElement("div");
+                            createdTimeValue.className = "text-end";
+                            const createdTime = new Date(comment.createdTime);
+                            var yyyy = createdTime.getFullYear();
+                            var mm = String(createdTime.getMonth() + 1).padStart(2, '0');
+                            var dd = String(createdTime.getDate()).padStart(2, '0');
+                            var hh = String(createdTime.getHours()).padStart(2, '0');
+                            var min = String(createdTime.getMinutes()).padStart(2, '0');
+                            createdTimeValue.innerText = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+                            createdTimeBadge.appendChild(createdTimeLabel);
+                            createdTimeBadge.appendChild(createdTimeValue);
+
+                            const updatedAtBadge = document.createElement("div");
+                            updatedAtBadge.className = "badge bg-light text-dark p-2 text-start";
+
+                            const updatedAtLabel = document.createElement("div");
+                            updatedAtLabel.className = "mb-2";
+                            updatedAtLabel.innerText = "Last modified at";
+
+                            const updatedAtValue = document.createElement("div");
+                            updatedAtValue.className = "text-end";
+                            const updatedAt = new Date(comment.updatedAt);
+                            var yyyy = updatedAt.getFullYear();
+                            var mm = String(updatedAt.getMonth() + 1).padStart(2, '0');
+                            var dd = String(updatedAt.getDate()).padStart(2, '0');
+                            var hh = String(updatedAt.getHours()).padStart(2, '0');
+                            var min = String(updatedAt.getMinutes()).padStart(2, '0');
+                            updatedAtValue.innerText = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+                            updatedAtBadge.appendChild(updatedAtLabel);
+                            updatedAtBadge.appendChild(updatedAtValue);
+
+                            metaWrapper.appendChild(authorBadge);
+                            metaWrapper.appendChild(createdTimeBadge);
+                            metaWrapper.appendChild(updatedAtBadge);
+
+                            card.appendChild(cardText);
+                            card.appendChild(metaWrapper);
+
+                            if (authStatus && comment.author.username == loggedInUsername) {
+                                const btnWrapper = document.createElement("div");
+                                btnWrapper.className = "m-3";
+
+                                const modifyBtn = document.createElement("a");
+                                modifyBtn.href = `/comment/modify/${comment.id}?return=${questionId}`;
+                                modifyBtn.className = "btn btn-sm btn-outline-secondary";
+                                modifyBtn.innerHTML = "Modify";
+
+                                const deleteBtn = document.createElement("a");
+                                deleteBtn.href = "javascript:void(0);";
+                                deleteBtn.className = "btn btn-sm btn-outline-secondary mx-2";
+                                deleteBtn.dataset.uri = `/comment/delete/${comment.id}?return=${questionId}`;
+                                deleteBtn.innerHTML = "Delete";
+                                deleteBtn.addEventListener('click', function() {
+                                    if(confirm("Do you really want to delete this?")) {
+                                        location.href = this.dataset.uri;
+                                    };
+                                });
+
+                                btnWrapper.appendChild(modifyBtn);
+                                btnWrapper.appendChild(deleteBtn);
+
+                                card.appendChild(btnWrapper);
+                            }
+
+                            answerComments.appendChild(card);
+                        });
+                    }
+                );
+            }); 
+        });
+    
+        const createComment_elements = document.getElementsByClassName("create-comment");
+        Array.from(createComment_elements).forEach(function(element) {
+            element.addEventListener('click', function() {
+                document.getElementById('commentForm_type').value = this.dataset.type;
+                document.getElementById('commentForm_target').value = this.dataset.target;
+                document.getElementById('commentForm_content').value = document.getElementById(this.dataset.content).value;
+                document.getElementById('commentForm').submit();
+            });
+        });
+
     </script>
 </html>

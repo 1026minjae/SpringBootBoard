@@ -1,6 +1,6 @@
 <html layout:decorate="~{layout}">
     <div layout:fragment="content" class="container">
-        <h5 class="my-3 border-bottom pb-2">Create a new question</h5>
+        <h5 class="my-3 border-bottom pb-2">Create/Edit a question</h5>
 
         <form th:object="${questionForm}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

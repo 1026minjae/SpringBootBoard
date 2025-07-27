@@ -26,26 +26,26 @@ class AnswerController (
 ) {
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/create/{id}")
+    @PostMapping("/create/{qid}")
     fun createAnswer(
         model: Model, 
-        @PathVariable("id") id: Long, 
+        @PathVariable("qid") qid: Long, 
         @Valid answerForm: AnswerForm, 
         bindingResult: BindingResult,
         principal: Principal
     ): String {
-        val question = questionService.getQuestionInfo(id)
-
-        val user = userService.getUser(principal.getName())
-
         if (bindingResult.hasErrors()) {
+            val question = questionService.getQuestionDetail(qid, 0)
             model.addAttribute("question", question)
             return "question_detail"
         }
+
+        val question = questionService.getQuestionInfo(qid)
+        val user = userService.getUser(principal.getName())
         
         val answer = answerService.create(question.id, answerForm.content!!, user)
 
-        return "redirect:/question/detail/${id}#answer_${answer.id}"
+        return "redirect:/question/detail/${qid}#answer_${answer.id}"
     }
 
     @PreAuthorize("isAuthenticated()")
