@@ -1,5 +1,7 @@
 package com.sbb.sbb_kotlin.user
 
+import com.sbb.sbb_kotlin.DataNotFoundException
+import com.sbb.sbb_kotlin.MailService
 import jakarta.validation.Valid
 import jakarta.servlet.http.HttpServletRequest
 import java.sql.SQLIntegrityConstraintViolationException
@@ -18,7 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 @RequestMapping("/user")
 @Controller
 class UserController (
-    private val userService: UserService
+    private val userService: UserService,
+    private val mailService: MailService
 ) {
 
     @PreAuthorize("isAuthenticated()")
@@ -49,6 +52,11 @@ class UserController (
         request.logout()
 
         return "redirect:/user/login"
+    }
+
+    @GetMapping("/login")
+    fun login(): String {
+        return "login_form"
     }
 
     @GetMapping("/signup")
@@ -89,8 +97,41 @@ class UserController (
         return "redirect:/"
     }
 
-    @GetMapping("/login")
-    fun login(): String {
-        return "login_form"
+    @GetMapping("/send-temp-password")
+    fun sendTempPassword(emailForm: EmailForm): String {
+        return "temp_password"
+    }
+
+    @PostMapping("/send-temp-password")
+    fun sendTempPassword(
+        @Valid emailForm: EmailForm,
+        bindingResult: BindingResult
+    ): String {
+        if (bindingResult.hasErrors()) {
+            return "temp_password"
+        }
+
+        try {
+            val tempPassword = userService.registerTempPassword(emailForm.email!!)
+            
+            mailService.sendTempPassword(emailForm.email, tempPassword)
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+            bindingResult.reject(
+                "userNotFound",
+                when (e) {
+                    is DataNotFoundException -> {
+                        "Given e-mail is not registered"
+                    }
+                    else -> {
+                        e.message ?: ""
+                    }
+                }
+            )
+            return "signup_form"
+        }
+
+        return "redirect:/user/login"
     }
 }
