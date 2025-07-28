@@ -1,9 +1,13 @@
 package com.sbb.sbb_kotlin.user
 
 import jakarta.validation.Valid
+import jakarta.servlet.http.HttpServletRequest
 import java.sql.SQLIntegrityConstraintViolationException
+import java.security.Principal
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.relational.core.conversion.DbActionExecutionException
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -16,6 +20,37 @@ import org.springframework.web.bind.annotation.RequestMapping
 class UserController (
     private val userService: UserService
 ) {
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/change-password")
+    fun changePassword(changePasswordForm: ChangePasswordForm): String {
+        return "change_password_form"
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/change-password")
+    fun changePassword(
+        @Valid changePasswordForm: ChangePasswordForm,
+        bindingResult: BindingResult,
+        principal: Principal,
+        request: HttpServletRequest
+    ): String {
+        if (bindingResult.hasErrors()) {
+            return "change_password_form"
+        }
+
+        if (!changePasswordForm.password1.equals(changePasswordForm.password2)) {
+            bindingResult.rejectValue("password2", "passwordInCorrect", "Two passwords are not equal.")
+            return "change_password_form"
+        }
+
+        userService.changePassword(principal.getName(), changePasswordForm.password1!!)
+
+        request.logout()
+
+        return "redirect:/user/login"
+    }
+
     @GetMapping("/signup")
     fun signup(userCreateForm: UserCreateForm): String {
         return "signup_form"

@@ -9,6 +9,21 @@ class UserService (
     private val userRepo: UserRepository,
     private val passwordEncoder: PasswordEncoder
 ) {
+
+    fun changePassword(username: String, newPassword: String) {
+        val siteUser = userRepo.findByUsername(username)
+        if (siteUser.isPresent) {
+            val user = siteUser.get()
+            
+            user.password = passwordEncoder.encode(newPassword)
+            
+            userRepo.save(user)
+        }
+        else {
+            throw DataNotFoundException("User is not found")
+        }
+    }
+
     fun create(username: String, email: String, password: String) {
         val user = SiteUser(
             username = username,

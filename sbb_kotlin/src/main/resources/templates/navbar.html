@@ -23,6 +23,14 @@
                         </button>
                     </form>
                 </li>
+                <!-- Only for logged-in users -->
+                <li class="nav-item" sec:authorize="isAuthenticated()"> 
+                    <form th:action="@{/user/change-password}" method="get" style="display:inline;">
+                        <button type="submit" class="nav-link btn btn-link p-0 me-2" style="border: none; background: none;">
+                            Change P/W
+                        </button>
+                    </form>
+                </li>
                 <li class="nav-item">
                     <form th:action="@{/user/signup}" method="get" style="display:inline;">
                         <button type="submit" class="nav-link btn btn-link p-0" style="border: none; background: none;">
